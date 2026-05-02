@@ -11,13 +11,14 @@
 	import { linesStore } from '$lib/stores/lines.svelte';
 	import { selectionStore } from '$lib/stores/selection.svelte';
 	import type { Vehicle } from '$lib/star/types';
-	import { lineColor } from '$lib/star/lines';
+	import { lineColor, lineTextColor } from '$lib/star/lines';
 
 	const ctx = getContext<{ get: () => MapLibreMap | undefined }>('map');
 
 	const SRC_ID = 'sr-vehicles';
 	const LAYER_DOT = 'sr-vehicles-dot';
 	const LAYER_RING = 'sr-vehicles-ring';
+	const LAYER_LABEL = 'sr-vehicles-label';
 
 	let added = $state(false);
 
@@ -28,6 +29,7 @@
 
 	function vehicleFeature(v: Vehicle, lng: number, lat: number): Feature<Point, GeoJsonProperties> {
 		const color = lineColor(v.lineCode, linesStore.byCode);
+		const textColor = lineTextColor(v.lineCode, linesStore.byCode);
 		return {
 			type: 'Feature',
 			id: v.id,
@@ -35,7 +37,9 @@
 			properties: {
 				id: v.id,
 				lineCode: v.lineCode ?? '',
+				label: (v.lineCode ?? '').toUpperCase(),
 				color,
+				textColor,
 				bearing: v.bearing ?? 0
 			}
 		};
@@ -79,10 +83,31 @@
 			source: SRC_ID,
 			paint: {
 				'circle-color': ['get', 'color'],
-				'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 4.5, 14, 6.5, 17, 10],
+				'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 5, 14, 9, 17, 14],
 				'circle-stroke-color': '#fbf7f7',
-				'circle-stroke-width': 1.8,
+				'circle-stroke-width': 1.6,
 				'circle-pitch-alignment': 'map'
+			}
+		});
+
+		map.addLayer({
+			id: LAYER_LABEL,
+			type: 'symbol',
+			source: SRC_ID,
+			minzoom: 11,
+			layout: {
+				'text-field': ['get', 'label'],
+				'text-font': ['Roboto Bold'],
+				'text-size': ['interpolate', ['linear'], ['zoom'], 11, 7.5, 14, 10, 17, 12.5],
+				'text-allow-overlap': true,
+				'text-ignore-placement': true,
+				'text-letter-spacing': -0.02,
+				'text-padding': 0
+			},
+			paint: {
+				'text-color': ['get', 'textColor'],
+				'text-halo-color': ['get', 'color'],
+				'text-halo-width': 0.4
 			}
 		});
 
@@ -136,10 +161,11 @@
 				['linear'],
 				['zoom'],
 				10,
-				0.15,
+				0.22,
 				14,
-				0.35
+				0.45
 			]);
+			map.setPaintProperty(LAYER_LABEL, 'text-opacity', 1);
 			return;
 		}
 		const matchExpr = ['case', ['==', ['get', 'lineCode'], filterCode], 1, 0.18] as never;
@@ -151,6 +177,8 @@
 			0.05
 		] as never;
 		map.setPaintProperty(LAYER_RING, 'circle-opacity', dimRing);
+		const dimLabel = ['case', ['==', ['get', 'lineCode'], filterCode], 1, 0.15] as never;
+		map.setPaintProperty(LAYER_LABEL, 'text-opacity', dimLabel);
 	});
 
 	$effect(() => {
@@ -192,6 +220,7 @@
 		if (raf != null) cancelAnimationFrame(raf);
 		const map = ctx.get();
 		if (!map || !added) return;
+		if (map.getLayer(LAYER_LABEL)) map.removeLayer(LAYER_LABEL);
 		if (map.getLayer(LAYER_DOT)) map.removeLayer(LAYER_DOT);
 		if (map.getLayer(LAYER_RING)) map.removeLayer(LAYER_RING);
 		if (map.getSource(SRC_ID)) map.removeSource(SRC_ID);
