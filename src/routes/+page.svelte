@@ -30,10 +30,15 @@
 		);
 	});
 
-	const metro = $derived(filtered.filter((l) => l.mode === 'metro'));
-	const chronostars = $derived(filtered.filter((l) => l.code.startsWith('C')));
+	// `numeric` makes "C2" < "C10" and "10" < "32" < "151" — the order a
+	// rider scans naturally rather than the API's arrival order.
+	const byCode = (a: { code: string }, b: { code: string }) =>
+		a.code.localeCompare(b.code, 'fr', { numeric: true, sensitivity: 'base' });
+
+	const metro = $derived(filtered.filter((l) => l.mode === 'metro').toSorted(byCode));
+	const chronostars = $derived(filtered.filter((l) => l.code.startsWith('C')).toSorted(byCode));
 	const otherBuses = $derived(
-		filtered.filter((l) => l.mode === 'bus' && !l.code.startsWith('C'))
+		filtered.filter((l) => l.mode === 'bus' && !l.code.startsWith('C')).toSorted(byCode)
 	);
 
 	const showEmptyState = $derived(
