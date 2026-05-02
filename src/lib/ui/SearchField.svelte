@@ -4,7 +4,11 @@
 		onInput: (v: string) => void;
 		placeholder?: string;
 	};
-	let { value = $bindable(), onInput, placeholder = 'Rechercher une ligne, un arrêt' }: Props = $props();
+	let {
+		value = $bindable(),
+		onInput,
+		placeholder = 'Rechercher une ligne, un arrêt'
+	}: Props = $props();
 </script>
 
 <label class="search">

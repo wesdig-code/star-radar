@@ -51,7 +51,11 @@ function isActive(r: OdsLine): boolean {
 	return /oui|true|1/i.test(r.estversionactive);
 }
 
-async function fetchAllRecords<T>(fetchImpl: typeof fetch, datasetId: string, pageSize = 100): Promise<T[]> {
+async function fetchAllRecords<T>(
+	fetchImpl: typeof fetch,
+	datasetId: string,
+	pageSize = 100
+): Promise<T[]> {
 	const out: T[] = [];
 	let offset = 0;
 	for (;;) {

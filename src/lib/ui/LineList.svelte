@@ -17,11 +17,7 @@
 		<ul role="list">
 			{#each lines as line (line.id)}
 				<li>
-					<button
-						type="button"
-						onclick={() => selectionStore.selectLine(line.code)}
-						class="row"
-					>
+					<button type="button" onclick={() => selectionStore.selectLine(line.code)} class="row">
 						<LineChip code={line.code} size="md" />
 						<span class="name">{line.name}</span>
 						<span class="mode">{line.mode === 'metro' ? 'Métro' : 'Bus'}</span>

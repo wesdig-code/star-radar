@@ -24,9 +24,7 @@
 		if (!q) return linesStore.lines;
 		return linesStore.lines.filter(
 			(l) =>
-				l.code.toLowerCase().includes(q) ||
-				l.name.toLowerCase().includes(q) ||
-				l.mode.includes(q)
+				l.code.toLowerCase().includes(q) || l.name.toLowerCase().includes(q) || l.mode.includes(q)
 		);
 	});
 

@@ -34,7 +34,7 @@ The STAR network (Keolis Rennes) publishes open data at `data.explore.star.fr`.
 - **Bus position interpolation:** linear between two GTFS-RT ticks; ease-out only for corrective jumps when an update arrives mid-interpolation.
 - **Prefer Svelte transitions/animations** (`transition:`, `animate:flip`) over JS-driven motion — they're framework-native and cheaper.
 - **Copy is French-first**, civic register. No "Try Pro", no engagement-marketing voice.
-- **No `#000` or `#fff` anywhere** — every neutral is tinted toward STAR red. See DESIGN.md *Tinted-Neutrals Rule*.
+- **No `#000` or `#fff` anywhere** — every neutral is tinted toward STAR red. See DESIGN.md _Tinted-Neutrals Rule_.
 
 ## Design context (quick reference)
 
@@ -47,6 +47,7 @@ The five strategic principles from PRODUCT.md, in priority order:
 5. **Civic, not corporate** — public-service tone, citizens not leads.
 
 Two doctrines from DESIGN.md to remember by name:
+
 - **The Operator-Truth Rule** — STAR's official line colors are sacred; never adjust them for "design coherence".
 - **The Tabular-Mono Rule** — anything that ticks (ETAs, codes, IDs) renders in mono with tabular figures.
 

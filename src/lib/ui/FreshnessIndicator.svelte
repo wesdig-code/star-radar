@@ -3,9 +3,7 @@
 	import { vehiclesStore } from '$lib/stores/vehicles.svelte';
 	import { formatRelative } from '$lib/utils/eta';
 
-	const ageMs = $derived(
-		vehiclesStore.updatedAt > 0 ? tick.now - vehiclesStore.updatedAt : 0
-	);
+	const ageMs = $derived(vehiclesStore.updatedAt > 0 ? tick.now - vehiclesStore.updatedAt : 0);
 	const stale = $derived(vehiclesStore.source === 'stale' || ageMs > 30_000);
 	const error = $derived(!!vehiclesStore.error);
 	const label = $derived(

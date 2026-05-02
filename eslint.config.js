@@ -16,5 +16,9 @@ export default ts.config(
 		files: ['**/*.svelte'],
 		languageOptions: { parserOptions: { parser: ts.parser } }
 	},
+	{
+		files: ['src/app.d.ts'],
+		rules: { '@typescript-eslint/no-empty-object-type': 'off' }
+	},
 	{ ignores: ['build/', '.svelte-kit/', 'dist/', '.wrangler/', 'node_modules/'] }
 );

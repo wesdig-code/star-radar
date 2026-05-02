@@ -11,18 +11,11 @@
 
 	const vehicle = $derived(vehiclesStore.vehicles.find((v) => v.id === vehicleId));
 	const line = $derived(vehicle?.lineCode ? linesStore.byCode.get(vehicle.lineCode) : undefined);
-	const speed = $derived(
-		vehicle?.speed != null ? `${Math.round(vehicle.speed * 3.6)} km/h` : null
-	);
+	const speed = $derived(vehicle?.speed != null ? `${Math.round(vehicle.speed * 3.6)} km/h` : null);
 </script>
 
 <header class="drill">
-	<button
-		class="back"
-		type="button"
-		onclick={() => selectionStore.clear()}
-		aria-label="Fermer"
-	>
+	<button class="back" type="button" onclick={() => selectionStore.clear()} aria-label="Fermer">
 		<svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
 			<path
 				d="m6 6 12 12M18 6 6 18"
@@ -40,7 +33,8 @@
 			<div class="meta">
 				<h2>{line?.name ?? 'Véhicule'}</h2>
 				<p class="tick">
-					{#if speed}{speed} · {/if}vu {formatRelative(vehicle.timestamp, tick.now)}
+					{#if speed}{speed} ·
+					{/if}vu {formatRelative(vehicle.timestamp, tick.now)}
 				</p>
 			</div>
 		</div>

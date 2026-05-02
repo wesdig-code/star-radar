@@ -22,7 +22,7 @@ Alive, kinetic, local.
 
 - **Alive** — the data is live, and the interface should feel that way. Vehicles ease between positions, lines pulse with current activity, arrivals tick. Movement comes from real signal, not decoration.
 - **Kinetic** — energy at the right altitude. Things respond instantly, transitions are quick, the city feels present and in motion. Not frantic, not loud — taut.
-- **Local** — this is *for and about Rennes*. The design carries specific local character (the colors of the actual STAR livery, the shape of the network, recognizable geography of the Vilaine and the Métro lines). A user in Lyon should not feel at home here.
+- **Local** — this is _for and about Rennes_. The design carries specific local character (the colors of the actual STAR livery, the shape of the network, recognizable geography of the Vilaine and the Métro lines). A user in Lyon should not feel at home here.
 
 The voice is civic and useful: confident, plain, helpful. French-first. No corporate growth language, no "Try Pro", no engagement bait.
 

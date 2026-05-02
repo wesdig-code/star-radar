@@ -95,12 +95,7 @@
 	}
 </script>
 
-<aside
-	class="sheet"
-	class:dragging
-	style:height="{height}px"
-	aria-label="Panneau lignes et arrêts"
->
+<aside class="sheet" class:dragging style:height="{height}px" aria-label="Panneau lignes et arrêts">
 	<div
 		class="grab"
 		role="slider"

@@ -9,6 +9,7 @@ dist
 !.env.example
 .vscode/*
 !.vscode/extensions.json
+.claude/settings.local.json
 test-results
 playwright-report
 playwright/.cache

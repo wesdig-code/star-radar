@@ -13,9 +13,30 @@ export const FALLBACK_LINES: Line[] = [
 	{ id: 'b', code: 'b', name: 'Métro b', mode: 'metro', color: '#009543', textColor: '#fff' },
 	{ id: 'C1', code: 'C1', name: 'Chronostar C1', mode: 'bus', color: '#0089d5', textColor: '#fff' },
 	{ id: 'C2', code: 'C2', name: 'Chronostar C2', mode: 'bus', color: '#00949f', textColor: '#fff' },
-	{ id: 'C3', code: 'C3', name: 'Chronostar C3', mode: 'bus', color: '#b69f00', textColor: '#17100e' },
-	{ id: 'C4', code: 'C4', name: 'Chronostar C4', mode: 'bus', color: '#d0ab00', textColor: '#17100e' },
-	{ id: 'C5', code: 'C5', name: 'Chronostar C5', mode: 'bus', color: '#ec7d00', textColor: '#17100e' },
+	{
+		id: 'C3',
+		code: 'C3',
+		name: 'Chronostar C3',
+		mode: 'bus',
+		color: '#b69f00',
+		textColor: '#17100e'
+	},
+	{
+		id: 'C4',
+		code: 'C4',
+		name: 'Chronostar C4',
+		mode: 'bus',
+		color: '#d0ab00',
+		textColor: '#17100e'
+	},
+	{
+		id: 'C5',
+		code: 'C5',
+		name: 'Chronostar C5',
+		mode: 'bus',
+		color: '#ec7d00',
+		textColor: '#17100e'
+	},
 	{ id: 'C6', code: 'C6', name: 'Chronostar C6', mode: 'bus', color: '#de3b3d', textColor: '#fff' },
 	{ id: 'C7', code: 'C7', name: 'Chronostar C7', mode: 'bus', color: '#5e4bc3', textColor: '#fff' }
 ];

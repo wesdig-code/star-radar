@@ -1,7 +1,8 @@
-<!-- SEED — re-run /impeccable document once there's code to capture the actual tokens and components. -->
----
+## <!-- SEED — re-run /impeccable document once there's code to capture the actual tokens and components. -->
+
 name: star-radar
 description: A live map of the STAR public transport network in Rennes
+
 ---
 
 # Design System: star-radar
@@ -17,6 +18,7 @@ The system orbits around the STAR / Keolis Rennes operator red as its canonical 
 What the system explicitly rejects, by name: the heavy 2010-era aesthetic of outdated French municipal sites, the cluttered density of a transit operations control room, the neon-on-black gradient theatrics of crypto / dark-mode bro startups, and the hero-metric card grids of generic SaaS dashboards. star-radar is none of those.
 
 **Key Characteristics:**
+
 - The map is the hero; chrome serves it.
 - STAR's actual line colors are sacred and used cartographically.
 - Motion is orchestrated and signal-bearing, never decorative.
@@ -28,16 +30,19 @@ What the system explicitly rejects, by name: the heavy 2010-era aesthetic of out
 The palette is the STAR network expressed as a design system: the operator's livery red as the anchor, the official line colors as named first-class roles, and Rennes-stone neutrals tinted toward the same red hue.
 
 ### Primary
-- **STAR Operator Red** *[exact OKLCH to be resolved during implementation, anchored on Keolis Rennes' official livery red]*: the canonical brand hue. Used in the app shell, primary CTAs, the radar pulse, and (in cartography) as the line `a` color.
+
+- **STAR Operator Red** _[exact OKLCH to be resolved during implementation, anchored on Keolis Rennes' official livery red]_: the canonical brand hue. Used in the app shell, primary CTAs, the radar pulse, and (in cartography) as the line `a` color.
 
 ### Secondary / Tertiary — Network Lines
-- **Line palette** *[exact OKLCH per line to be resolved during implementation, sourced from Keolis Rennes' official line color spec]*: every STAR line (a, b, C1–C7, regular bus lines) gets its own first-class slot in the system. These are not decorative — they are operator data rendered as color.
+
+- **Line palette** _[exact OKLCH per line to be resolved during implementation, sourced from Keolis Rennes' official line color spec]_: every STAR line (a, b, C1–C7, regular bus lines) gets its own first-class slot in the system. These are not decorative — they are operator data rendered as color.
 
 ### Neutral
-- **Granite** *[OKLCH TBD]*: the deepest body-text neutral, tinted toward operator red hue (chroma 0.005–0.01).
-- **Slate** *[OKLCH TBD]*: cooler mid neutral for secondary surfaces, dividers, and inactive states.
-- **Cream** *[OKLCH TBD]*: warm off-white for light surfaces. Never pure `#fff`.
-- **Ink** *[OKLCH TBD]*: near-black for high-contrast text and the deepest surfaces. Never pure `#000`.
+
+- **Granite** _[OKLCH TBD]_: the deepest body-text neutral, tinted toward operator red hue (chroma 0.005–0.01).
+- **Slate** _[OKLCH TBD]_: cooler mid neutral for secondary surfaces, dividers, and inactive states.
+- **Cream** _[OKLCH TBD]_: warm off-white for light surfaces. Never pure `#fff`.
+- **Ink** _[OKLCH TBD]_: near-black for high-contrast text and the deepest surfaces. Never pure `#000`.
 
 ### Named Rules
 
@@ -49,18 +54,19 @@ The palette is the STAR network expressed as a design system: the operator's liv
 
 ## 3. Typography
 
-**Display Font:** *[humanist sans family — to be chosen at implementation]*
-**Body Font:** *[same family as display, lighter / regular weights]*
-**Label / Mono Font:** *[a clean mono — IBM Plex Mono, JetBrains Mono, or similar — to be chosen at implementation]*
+**Display Font:** _[humanist sans family — to be chosen at implementation]_
+**Body Font:** _[same family as display, lighter / regular weights]_
+**Label / Mono Font:** _[a clean mono — IBM Plex Mono, JetBrains Mono, or similar — to be chosen at implementation]_
 
 **Character:** Humanist sans for prose so the voice reads warm and civic, not mechanical or anonymous. Mono for any string that ticks or codes — line names, stop codes, ETAs, vehicle IDs. The juxtaposition of breathing prose and counting numbers is part of the radar feel.
 
 ### Hierarchy
-- **Display** *(weights TBD)*: rare. Hero headlines, big route or stop titles.
-- **Headline** *(weights TBD)*: panel section headers.
-- **Title** *(weights TBD)*: list-item headers, line and stop cards.
-- **Body** *(weights TBD)*: prose and descriptions. Cap line length at 65–75ch.
-- **Mono Label** *(weights TBD)*: line codes, stop codes, ETAs, vehicle IDs, all timestamps. Tabular figures required.
+
+- **Display** _(weights TBD)_: rare. Hero headlines, big route or stop titles.
+- **Headline** _(weights TBD)_: panel section headers.
+- **Title** _(weights TBD)_: list-item headers, line and stop cards.
+- **Body** _(weights TBD)_: prose and descriptions. Cap line length at 65–75ch.
+- **Mono Label** _(weights TBD)_: line codes, stop codes, ETAs, vehicle IDs, all timestamps. Tabular figures required.
 
 ### Named Rules
 
@@ -83,6 +89,7 @@ Omitted in seed mode — no implementation yet. Re-run `/impeccable document` on
 ## 6. Do's and Don'ts
 
 ### Do:
+
 - **Do** use STAR's official line colors verbatim for any line or route representation in the cartography.
 - **Do** tint every neutral toward the operator red hue (chroma 0.005–0.01).
 - **Do** use mono with tabular figures for any ticking value.
@@ -92,6 +99,7 @@ Omitted in seed mode — no implementation yet. Re-run `/impeccable document` on
 - **Do** orchestrate motion deliberately — entrances, sequenced reveals, pulse cycles — when motion encodes real signal.
 
 ### Don't:
+
 - **Don't** adjust STAR line colors for design coherence. The colors are the operator's, not ours.
 - **Don't** use `#000` or `#fff` anywhere.
 - **Don't** wrap content in card grids on top of the map. Especially not nested cards.

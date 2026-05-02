@@ -12,9 +12,7 @@
 	<div class="nudge" role="status">
 		<p>Active la localisation pour voir les bus près de toi.</p>
 		<div class="actions">
-			<button class="primary" type="button" onclick={() => geoStore.request()}>
-				Activer
-			</button>
+			<button class="primary" type="button" onclick={() => geoStore.request()}> Activer </button>
 			<button
 				class="ghost"
 				type="button"

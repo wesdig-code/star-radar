@@ -117,11 +117,15 @@
 		map.on('mouseleave', LAYER_DOT, () => {
 			map.getCanvas().style.cursor = '';
 		});
-		map.on('click', LAYER_DOT, (e: MapMouseEvent & { features?: maplibregl.MapGeoJSONFeature[] }) => {
-			const f = e.features?.[0];
-			const id = f?.properties?.id as string | undefined;
-			if (id) selectionStore.selectVehicle(id);
-		});
+		map.on(
+			'click',
+			LAYER_DOT,
+			(e: MapMouseEvent & { features?: maplibregl.MapGeoJSONFeature[] }) => {
+				const f = e.features?.[0];
+				const id = f?.properties?.id as string | undefined;
+				if (id) selectionStore.selectVehicle(id);
+			}
+		);
 
 		added = true;
 	}
@@ -170,12 +174,7 @@
 		}
 		const matchExpr = ['case', ['==', ['get', 'lineCode'], filterCode], 1, 0.18] as never;
 		map.setPaintProperty(LAYER_DOT, 'circle-opacity', matchExpr);
-		const dimRing = [
-			'case',
-			['==', ['get', 'lineCode'], filterCode],
-			0.45,
-			0.05
-		] as never;
+		const dimRing = ['case', ['==', ['get', 'lineCode'], filterCode], 0.45, 0.05] as never;
 		map.setPaintProperty(LAYER_RING, 'circle-opacity', dimRing);
 		const dimLabel = ['case', ['==', ['get', 'lineCode'], filterCode], 1, 0.15] as never;
 		map.setPaintProperty(LAYER_LABEL, 'text-opacity', dimLabel);

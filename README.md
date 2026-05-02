@@ -22,14 +22,14 @@ pnpm dev
 
 ## Scripts
 
-| Commande | Rôle |
-| --- | --- |
-| `pnpm dev` | serveur Vite |
-| `pnpm build` | build production (adapter Cloudflare) |
-| `pnpm preview` | aperçu local du build |
-| `pnpm check` | `svelte-check` (types + templates) |
-| `pnpm lint` / `pnpm format` | Prettier + ESLint |
-| `pnpm test:visual` | tests Playwright |
+| Commande                    | Rôle                                  |
+| --------------------------- | ------------------------------------- |
+| `pnpm dev`                  | serveur Vite                          |
+| `pnpm build`                | build production (adapter Cloudflare) |
+| `pnpm preview`              | aperçu local du build                 |
+| `pnpm check`                | `svelte-check` (types + templates)    |
+| `pnpm lint` / `pnpm format` | Prettier + ESLint                     |
+| `pnpm test:visual`          | tests Playwright                      |
 
 ## Documentation
 
