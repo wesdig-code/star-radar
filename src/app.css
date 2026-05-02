@@ -1,0 +1,142 @@
+@import 'tailwindcss';
+@import 'maplibre-gl/dist/maplibre-gl.css';
+
+/*
+ * Design tokens. Anchored on Keolis Rennes operator red (~ #DA291C → OKLCH).
+ * STAR official line colors are best-known approximations; refined at runtime
+ * from /api/lines (Operator-Truth Rule, DESIGN.md).
+ */
+@theme {
+	--color-star-red: oklch(54% 0.21 32);
+	--color-star-red-hover: oklch(50% 0.21 32);
+	--color-star-tint: oklch(96% 0.04 32);
+
+	--color-ink: oklch(18% 0.012 32);
+	--color-ink-soft: oklch(36% 0.012 32);
+	--color-slate: oklch(54% 0.008 32);
+	--color-slate-soft: oklch(76% 0.006 32);
+	--color-cream: oklch(98% 0.004 32);
+	--color-cream-deep: oklch(96% 0.006 32);
+	--color-stale: oklch(70% 0.13 60);
+	--color-late: oklch(70% 0.18 50);
+
+	--color-line-a: oklch(56% 0.21 32);
+	--color-line-b: oklch(58% 0.17 152);
+	--color-line-c1: oklch(60% 0.16 240);
+	--color-line-c2: oklch(58% 0.16 200);
+	--color-line-c3: oklch(70% 0.16 100);
+	--color-line-c4: oklch(75% 0.17 95);
+	--color-line-c5: oklch(70% 0.18 60);
+	--color-line-c6: oklch(60% 0.2 25);
+	--color-line-c7: oklch(50% 0.18 285);
+
+	--font-sans:
+		-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
+	--font-mono:
+		'JetBrains Mono', 'SF Mono', 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+
+	--ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
+	--ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+	--ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+	:root {
+		color-scheme: light;
+		--surface-bg: var(--color-cream);
+		--surface-fg: var(--color-ink);
+		--surface-fg-soft: var(--color-ink-soft);
+		--surface-elev: oklch(100% 0 0 / 0.85);
+		--surface-divider: oklch(85% 0.005 32);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root {
+			color-scheme: dark;
+			--surface-bg: oklch(16% 0.012 32);
+			--surface-fg: oklch(95% 0.005 32);
+			--surface-fg-soft: oklch(72% 0.008 32);
+			--surface-elev: oklch(22% 0.014 32 / 0.92);
+			--surface-divider: oklch(28% 0.012 32);
+		}
+	}
+
+	html,
+	body {
+		height: 100%;
+		margin: 0;
+		padding: 0;
+		background: var(--surface-bg);
+		color: var(--surface-fg);
+		font-family: var(--font-sans);
+		font-size: 15px;
+		line-height: 1.45;
+		-webkit-font-smoothing: antialiased;
+		text-rendering: optimizeLegibility;
+		overscroll-behavior: none;
+	}
+
+	body {
+		font-feature-settings: 'ss01' on, 'cv11' on;
+	}
+
+	* {
+		box-sizing: border-box;
+	}
+
+	button {
+		font: inherit;
+		color: inherit;
+		background: none;
+		border: 0;
+		padding: 0;
+		cursor: pointer;
+	}
+
+	:focus-visible {
+		outline: 2px solid var(--color-star-red);
+		outline-offset: 2px;
+	}
+}
+
+@utility mono {
+	font-family: var(--font-mono);
+	font-variant-numeric: tabular-nums;
+	letter-spacing: -0.01em;
+}
+
+/* The Tabular-Mono Rule (DESIGN.md): anything that ticks renders mono+tabular. */
+.tick {
+	font-family: var(--font-mono);
+	font-variant-numeric: tabular-nums;
+	letter-spacing: -0.01em;
+}
+
+@keyframes pulse-fresh {
+	0%,
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.6;
+		transform: scale(1.4);
+	}
+}
+
+@keyframes fade-in-up {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* MapLibre canvas should never show a focus ring inside the map; we own focus
+   management on overlay controls instead. */
+.maplibregl-canvas:focus {
+	outline: none;
+}
