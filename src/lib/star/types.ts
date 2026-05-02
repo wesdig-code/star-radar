@@ -52,3 +52,54 @@ export interface NextPassage {
 	delaySeconds: number;
 	precision: 'realtime' | 'theoretical';
 }
+
+/**
+ * GTFS-RT alert effect classes we filter on for the metro banner (#6).
+ * Anything outside this set is not "significant enough" to push a forced
+ * banner — but it can still appear in the network drawer (#3).
+ */
+export type SignificantAlertEffect =
+	| 'NO_SERVICE'
+	| 'REDUCED_SERVICE'
+	| 'SIGNIFICANT_DELAYS'
+	| 'DETOUR';
+
+export interface NetworkAlert {
+	id: string;
+	header: string;
+	description?: string;
+	url?: string;
+	effect:
+		| SignificantAlertEffect
+		| 'STOP_MOVED'
+		| 'OTHER_EFFECT'
+		| 'UNKNOWN_EFFECT'
+		| 'ADDITIONAL_SERVICE'
+		| 'MODIFIED_SERVICE'
+		| 'ACCESSIBILITY_ISSUE';
+	cause?: string;
+	affectedRoutes: string[];
+	affectedStops: string[];
+	start?: number;
+	end?: number;
+}
+
+export interface DelayedLine {
+	routeId: string;
+	routeShortName: string;
+	avgDelayMin: number | null;
+	affectedTrips: number;
+}
+
+export interface CancelledLine {
+	routeId: string;
+	routeShortName: string;
+	cancelledTrips: number;
+}
+
+export interface NetworkHealth {
+	updatedAt: string;
+	delayedLines: DelayedLine[];
+	cancelledLines: CancelledLine[];
+	alerts: NetworkAlert[];
+}

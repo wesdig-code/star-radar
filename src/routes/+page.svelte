@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Map from '$lib/map/Map.svelte';
 	import VehicleLayer from '$lib/map/VehicleLayer.svelte';
+	import StopLayer from '$lib/map/StopLayer.svelte';
 	import BottomSheet from '$lib/ui/BottomSheet.svelte';
 	import FreshnessIndicator from '$lib/ui/FreshnessIndicator.svelte';
 	import CenterButton from '$lib/ui/CenterButton.svelte';
@@ -10,9 +11,12 @@
 	import DrillBus from '$lib/ui/DrillBus.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import GeoNudge from '$lib/ui/GeoNudge.svelte';
+	import NetworkHealthDrawer from '$lib/ui/NetworkHealthDrawer.svelte';
+	import MetroBanner from '$lib/ui/MetroBanner.svelte';
 	import { linesStore } from '$lib/stores/lines.svelte';
 	import { selectionStore } from '$lib/stores/selection.svelte';
 	import { vehiclesStore } from '$lib/stores/vehicles.svelte';
+	import { favoritesStore } from '$lib/stores/favorites.svelte';
 	import type { Map as MapLibreMap } from 'maplibre-gl';
 
 	let mapRef = $state<MapLibreMap | undefined>();
@@ -33,11 +37,16 @@
 	const byCode = (a: { code: string }, b: { code: string }) =>
 		a.code.localeCompare(b.code, 'fr', { numeric: true, sensitivity: 'base' });
 
-	const metro = $derived(filtered.filter((l) => l.mode === 'metro').toSorted(byCode));
-	const chronostars = $derived(filtered.filter((l) => l.code.startsWith('C')).toSorted(byCode));
+	const favoriteSet = $derived(new Set(favoritesStore.codes));
+	const favorites = $derived(filtered.filter((l) => favoriteSet.has(l.code)).toSorted(byCode));
+	const rest = $derived(filtered.filter((l) => !favoriteSet.has(l.code)));
+
+	const metro = $derived(rest.filter((l) => l.mode === 'metro').toSorted(byCode));
+	const chronostars = $derived(rest.filter((l) => l.code.startsWith('C')).toSorted(byCode));
 	const otherBuses = $derived(
-		filtered.filter((l) => l.mode === 'bus' && !l.code.startsWith('C')).toSorted(byCode)
+		rest.filter((l) => l.mode === 'bus' && !l.code.startsWith('C')).toSorted(byCode)
 	);
+	const hasFavorites = $derived(favorites.length > 0);
 
 	const showEmptyState = $derived(
 		vehiclesStore.loading ||
@@ -73,53 +82,63 @@
 </svelte:head>
 
 <div class="root">
-	<Map onReady={onMapReady}>
-		<VehicleLayer />
-	</Map>
+	<MetroBanner />
+	<div class="map-stack">
+		<Map onReady={onMapReady}>
+			<StopLayer />
+			<VehicleLayer />
+		</Map>
 
-	<div class="top-right">
-		<FreshnessIndicator />
-		<CenterButton onCenter={handleCentre} />
-	</div>
+		<div class="top-right">
+			<NetworkHealthDrawer />
+			<FreshnessIndicator />
+			<CenterButton onCenter={handleCentre} />
+		</div>
 
-	<BottomSheet bind:snap={sheetSnap}>
-		{#snippet header()}
-			{#if selectionStore.current.kind === 'line'}
-				<DrillLine lineCode={selectionStore.current.lineCode} />
-			{:else if selectionStore.current.kind === 'vehicle'}
-				<DrillBus vehicleId={selectionStore.current.vehicleId} />
+		<BottomSheet bind:snap={sheetSnap}>
+			{#snippet header()}
+				{#if selectionStore.current.kind === 'line'}
+					<DrillLine lineCode={selectionStore.current.lineCode} />
+				{:else if selectionStore.current.kind === 'vehicle'}
+					<DrillBus vehicleId={selectionStore.current.vehicleId} />
+				{:else}
+					<div class="default-header">
+						<SearchField bind:value={query} onInput={(v) => (query = v)} />
+					</div>
+				{/if}
+			{/snippet}
+			{#if selectionStore.current.kind === 'none'}
+				<GeoNudge />
+				{#if showEmptyState}
+					<EmptyState />
+				{/if}
+				{#if hasFavorites}
+					<LineList title="Mes lignes" lines={favorites} />
+					<LineList title="Métro" lines={metro} separator />
+				{:else}
+					<LineList title="Métro" lines={metro} />
+				{/if}
+				<LineList title="Chronostars" lines={chronostars} />
+				<LineList title="Autres lignes" lines={otherBuses} />
+				{#if filtered.length === 0 && query.length > 0}
+					<p class="no-match">Aucun résultat pour « {query} ».</p>
+				{/if}
 			{:else}
-				<div class="default-header">
-					<SearchField bind:value={query} onInput={(v) => (query = v)} />
+				<div class="drill-body">
+					{#if selectionStore.current.kind === 'line'}
+						<p class="drill-hint">
+							Les bus de cette ligne sont en surbrillance sur la carte. Les autres lignes restent
+							visibles, atténuées.
+						</p>
+					{:else if selectionStore.current.kind === 'vehicle'}
+						<p class="drill-hint">
+							Suivi du véhicule en direct. La position se met à jour toutes les 12&nbsp;secondes.
+						</p>
+					{/if}
 				</div>
 			{/if}
-		{/snippet}
-		{#if selectionStore.current.kind === 'none'}
-			<GeoNudge />
-			{#if showEmptyState}
-				<EmptyState />
-			{/if}
-			<LineList title="Métro" lines={metro} />
-			<LineList title="Chronostars" lines={chronostars} />
-			<LineList title="Autres lignes" lines={otherBuses} />
-			{#if filtered.length === 0 && query.length > 0}
-				<p class="no-match">Aucun résultat pour « {query} ».</p>
-			{/if}
-		{:else}
-			<div class="drill-body">
-				{#if selectionStore.current.kind === 'line'}
-					<p class="drill-hint">
-						Les bus de cette ligne sont en surbrillance sur la carte. Les autres lignes restent
-						visibles, atténuées.
-					</p>
-				{:else if selectionStore.current.kind === 'vehicle'}
-					<p class="drill-hint">
-						Suivi du véhicule en direct. La position se met à jour toutes les 12&nbsp;secondes.
-					</p>
-				{/if}
-			</div>
-		{/if}
-	</BottomSheet>
+		</BottomSheet>
+	</div>
 </div>
 
 <style>
@@ -127,6 +146,13 @@
 		position: fixed;
 		inset: 0;
 		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+	}
+	.map-stack {
+		position: relative;
+		flex: 1;
+		min-height: 0;
 	}
 	.top-right {
 		position: absolute;

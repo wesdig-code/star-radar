@@ -9,6 +9,10 @@ import type { Line, Stop, Vehicle } from './types';
 const ODS_BASE = 'https://data.explore.star.fr/api/explore/v2.1/catalog/datasets';
 const GTFS_RT_VEHICLE_POSITIONS =
 	'https://proxy.transport.data.gouv.fr/resource/star-rennes-integration-gtfs-rt-vehicle-position';
+export const GTFS_RT_TRIP_UPDATES =
+	'https://proxy.transport.data.gouv.fr/resource/star-rennes-integration-gtfs-rt-trip-update';
+export const GTFS_RT_ALERTS =
+	'https://proxy.transport.data.gouv.fr/resource/star-rennes-integration-gtfs-rt-alerts';
 
 interface OdsRecord<T> {
 	results: T[];
@@ -37,6 +41,13 @@ interface OdsStop {
 	stop_id?: string;
 }
 
+interface OdsDesserte {
+	idligne?: string;
+	nomcourtligne?: string;
+	idarret?: string;
+	stop_id?: string;
+}
+
 function normalizeColor(raw: string | undefined): string {
 	// MapLibre v4 paint accepts only legacy CSS colors (hex/rgb/hsl), not oklch.
 	if (!raw) return '#736d6c';
@@ -54,7 +65,8 @@ function isActive(r: OdsLine): boolean {
 async function fetchAllRecords<T>(
 	fetchImpl: typeof fetch,
 	datasetId: string,
-	pageSize = 100
+	pageSize = 100,
+	hardCap = 2000
 ): Promise<T[]> {
 	const out: T[] = [];
 	let offset = 0;
@@ -67,7 +79,7 @@ async function fetchAllRecords<T>(
 		if (data.results.length < pageSize) break;
 		offset += pageSize;
 		if (offset >= data.total_count) break;
-		if (offset >= 2000) break;
+		if (offset >= hardCap) break;
 	}
 	return out;
 }
@@ -120,11 +132,29 @@ export async function fetchLines(fetchImpl: typeof fetch): Promise<Line[]> {
 }
 
 export async function fetchStops(fetchImpl: typeof fetch, limit = 1000): Promise<Stop[]> {
-	const records = await fetchAllRecords<OdsStop>(
-		fetchImpl,
-		'tco-bus-topologie-pointsarret-td',
-		Math.min(100, limit)
-	);
+	const [records, dessertes] = await Promise.all([
+		fetchAllRecords<OdsStop>(
+			fetchImpl,
+			'tco-bus-topologie-pointsarret-td',
+			Math.min(100, limit),
+			2500
+		),
+		// `dessertes` records are essentially `stop_times.txt` rows: one per
+		// (parcours, stop). 8.4k rows on the STAR network — small enough to
+		// fold into a `stop_id → [lineCode]` index server-side once a day.
+		fetchAllRecords<OdsDesserte>(fetchImpl, 'tco-bus-topologie-dessertes-td', 100, 12_000)
+	]);
+
+	const linesByStop = new Map<string, Set<string>>();
+	for (const d of dessertes) {
+		const stopId = (d.idarret ?? d.stop_id ?? '').toString();
+		const lineCode = d.nomcourtligne ?? d.idligne;
+		if (!stopId || !lineCode) continue;
+		const set = linesByStop.get(stopId) ?? new Set<string>();
+		set.add(lineCode);
+		linesByStop.set(stopId, set);
+	}
+
 	return records
 		.slice(0, limit)
 		.map((r): Stop | null => {
@@ -132,13 +162,16 @@ export async function fetchStops(fetchImpl: typeof fetch, limit = 1000): Promise
 			if (!point) return null;
 			const id = (r.id ?? r.code ?? r.stop_id ?? '').toString();
 			if (!id) return null;
+			const lines = linesByStop.get(id) ?? new Set<string>();
 			return {
 				id,
 				code: r.code ?? id,
 				name: r.nom ?? id,
 				lng: point.lon,
 				lat: point.lat,
-				lineCodes: [],
+				lineCodes: [...lines].sort((a, b) =>
+					a.localeCompare(b, 'fr', { numeric: true, sensitivity: 'base' })
+				),
 				wheelchair: /true|oui|1/i.test(r.estaccessiblepmr ?? '')
 			};
 		})
@@ -207,6 +240,25 @@ export async function fetchVehiclePositions(
 function deriveLineCode(routeId: string): string | undefined {
 	const m = routeId.match(/(?:^|-)0*([A-Za-z]?\d{1,4}[A-Za-z]?)$/);
 	return m ? m[1] : undefined;
+}
+
+export type DecodedFeed = ReturnType<
+	typeof GtfsRealtimeBindings.transit_realtime.FeedMessage.decode
+>;
+
+async function fetchAndDecode(fetchImpl: typeof fetch, url: string): Promise<DecodedFeed> {
+	const res = await fetchImpl(url, { headers: { Accept: 'application/x-protobuf' } });
+	if (!res.ok) throw new Error(`GTFS-RT ${url} ${res.status}`);
+	const buffer = await res.arrayBuffer();
+	return GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(new Uint8Array(buffer));
+}
+
+export function fetchTripUpdates(fetchImpl: typeof fetch): Promise<DecodedFeed> {
+	return fetchAndDecode(fetchImpl, GTFS_RT_TRIP_UPDATES);
+}
+
+export function fetchAlerts(fetchImpl: typeof fetch): Promise<DecodedFeed> {
+	return fetchAndDecode(fetchImpl, GTFS_RT_ALERTS);
 }
 
 /**

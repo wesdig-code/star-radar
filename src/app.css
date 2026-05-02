@@ -19,6 +19,10 @@
 	--color-cream-deep: oklch(96% 0.006 32);
 	--color-stale: oklch(70% 0.13 60);
 	--color-late: oklch(70% 0.18 50);
+	/* Favorite-star fill. Tinted toward STAR red — never a pure yellow.
+	   Used by .star-toggle.on (cf. Tinted-Neutrals Rule, DESIGN.md). */
+	--color-favorite: oklch(82% 0.17 84);
+	--color-alert-banner: oklch(46% 0.21 32);
 
 	--color-line-a: oklch(56% 0.21 32);
 	--color-line-b: oklch(58% 0.17 152);

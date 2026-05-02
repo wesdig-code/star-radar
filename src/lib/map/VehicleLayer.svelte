@@ -10,6 +10,7 @@
 	import { vehiclesStore } from '$lib/stores/vehicles.svelte';
 	import { linesStore } from '$lib/stores/lines.svelte';
 	import { selectionStore } from '$lib/stores/selection.svelte';
+	import { favoritesStore } from '$lib/stores/favorites.svelte';
 	import type { Vehicle } from '$lib/star/types';
 	import { lineColor, lineTextColor } from '$lib/star/lines';
 
@@ -152,13 +153,38 @@
 		const map = ctx.get();
 		if (!map || !added) return;
 		const sel = selectionStore.current;
+		const favorites = favoritesStore.codes;
 		const filterCode =
 			sel.kind === 'line'
 				? sel.lineCode
 				: sel.kind === 'vehicle'
 					? vehiclesStore.vehicles.find((v) => v.id === sel.vehicleId)?.lineCode
 					: null;
-		if (!filterCode) {
+
+		if (filterCode) {
+			// Active selection wins over favorites: highlight just the selected line.
+			const matchExpr = ['case', ['==', ['get', 'lineCode'], filterCode], 1, 0.18] as never;
+			map.setPaintProperty(LAYER_DOT, 'circle-opacity', matchExpr);
+			const dimRing = ['case', ['==', ['get', 'lineCode'], filterCode], 0.45, 0.05] as never;
+			map.setPaintProperty(LAYER_RING, 'circle-opacity', dimRing);
+			const dimLabel = ['case', ['==', ['get', 'lineCode'], filterCode], 1, 0.15] as never;
+			map.setPaintProperty(LAYER_LABEL, 'text-opacity', dimLabel);
+			map.setPaintProperty(LAYER_DOT, 'circle-radius', [
+				'interpolate',
+				['linear'],
+				['zoom'],
+				10,
+				5,
+				14,
+				9,
+				17,
+				14
+			]);
+			return;
+		}
+
+		if (favorites.length === 0) {
+			// No favorites set → everything 100%, default radii.
 			map.setPaintProperty(LAYER_DOT, 'circle-opacity', 1);
 			map.setPaintProperty(LAYER_RING, 'circle-opacity', [
 				'interpolate',
@@ -170,14 +196,37 @@
 				0.45
 			]);
 			map.setPaintProperty(LAYER_LABEL, 'text-opacity', 1);
+			map.setPaintProperty(LAYER_DOT, 'circle-radius', [
+				'interpolate',
+				['linear'],
+				['zoom'],
+				10,
+				5,
+				14,
+				9,
+				17,
+				14
+			]);
 			return;
 		}
-		const matchExpr = ['case', ['==', ['get', 'lineCode'], filterCode], 1, 0.18] as never;
-		map.setPaintProperty(LAYER_DOT, 'circle-opacity', matchExpr);
-		const dimRing = ['case', ['==', ['get', 'lineCode'], filterCode], 0.45, 0.05] as never;
-		map.setPaintProperty(LAYER_RING, 'circle-opacity', dimRing);
-		const dimLabel = ['case', ['==', ['get', 'lineCode'], filterCode], 1, 0.15] as never;
-		map.setPaintProperty(LAYER_LABEL, 'text-opacity', dimLabel);
+
+		// Some lines are pinned → highlight them, attenuate the rest.
+		const inFavs = ['in', ['get', 'lineCode'], ['literal', favorites]] as never;
+		map.setPaintProperty(LAYER_DOT, 'circle-opacity', ['case', inFavs, 1, 0.55] as never);
+		map.setPaintProperty(LAYER_RING, 'circle-opacity', [
+			'case',
+			inFavs,
+			['interpolate', ['linear'], ['zoom'], 10, 0.3, 14, 0.55],
+			['interpolate', ['linear'], ['zoom'], 10, 0.1, 14, 0.2]
+		] as never);
+		map.setPaintProperty(LAYER_LABEL, 'text-opacity', ['case', inFavs, 1, 0.6] as never);
+		// Pinned lines also bump up by a hair to feel emphasized at-a-glance.
+		map.setPaintProperty(LAYER_DOT, 'circle-radius', [
+			'case',
+			inFavs,
+			['interpolate', ['linear'], ['zoom'], 10, 6, 14, 11, 17, 16],
+			['interpolate', ['linear'], ['zoom'], 10, 5, 14, 9, 17, 14]
+		] as never);
 	});
 
 	$effect(() => {

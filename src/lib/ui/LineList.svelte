@@ -1,5 +1,6 @@
 <script lang="ts">
 	import LineChip from './LineChip.svelte';
+	import StarToggle from './StarToggle.svelte';
 	import type { Line } from '$lib/star/types';
 	import { selectionStore } from '$lib/stores/selection.svelte';
 
@@ -7,12 +8,14 @@
 		title: string;
 		lines: Line[];
 		muted?: boolean;
+		/** Render a thin top divider above the section heading. */
+		separator?: boolean;
 	};
-	let { title, lines, muted = false }: Props = $props();
+	let { title, lines, muted = false, separator = false }: Props = $props();
 </script>
 
 {#if lines.length > 0}
-	<section class="block" class:muted>
+	<section class="block" class:muted class:separator>
 		<h2>{title}</h2>
 		<ul role="list">
 			{#each lines as line (line.id)}
@@ -21,6 +24,7 @@
 						<LineChip code={line.code} size="md" />
 						<span class="name">{line.name}</span>
 						<span class="mode">{line.mode === 'metro' ? 'Métro' : 'Bus'}</span>
+						<StarToggle code={line.code} label={line.code} size="sm" />
 					</button>
 				</li>
 			{/each}
@@ -34,6 +38,11 @@
 	}
 	.block.muted {
 		opacity: 0.85;
+	}
+	.block.separator {
+		border-top: 1px solid var(--surface-divider);
+		margin-top: 6px;
+		padding-top: 10px;
 	}
 	h2 {
 		margin: 6px 18px;
