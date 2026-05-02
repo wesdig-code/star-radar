@@ -38,11 +38,11 @@ interface OdsStop {
 }
 
 function normalizeColor(raw: string | undefined): string {
-	if (!raw) return 'oklch(54% 0.008 32)';
+	// MapLibre v4 paint accepts only legacy CSS colors (hex/rgb/hsl), not oklch.
+	if (!raw) return '#736d6c';
 	const v = raw.trim();
 	if (v.startsWith('#')) return v;
 	if (/^[0-9a-f]{6}$/i.test(v)) return `#${v}`;
-	if (v.startsWith('oklch')) return v;
 	return v;
 }
 

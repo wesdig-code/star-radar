@@ -80,7 +80,7 @@
 			paint: {
 				'circle-color': ['get', 'color'],
 				'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 3.5, 14, 5, 17, 8],
-				'circle-stroke-color': 'oklch(98% 0.004 32)',
+				'circle-stroke-color': '#fbf7f7',
 				'circle-stroke-width': 1.4,
 				'circle-pitch-alignment': 'map'
 			}
