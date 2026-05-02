@@ -64,27 +64,31 @@
 	}
 	/* Quiet the basemap so STAR line colours carry the cartography. The Map-
 	   Floor Rule (DESIGN.md): map is the floor, lines are the show. With a
-	   raster OSM source, we lean on filter + a tinted veil. Replace this with
+	   raster OSM source, we lean on filter + a subtle veil. Replace this with
 	   a designer-tuned vector style when MAPTILER_KEY lands. */
 	.map-root::after {
 		content: '';
 		position: absolute;
 		inset: 0;
 		pointer-events: none;
-		background: oklch(98% 0.004 32 / 0.32);
+		background: oklch(98% 0.004 32 / 0.18);
 		mix-blend-mode: lighten;
 		z-index: 1;
 	}
 	:global(.map-canvas .maplibregl-canvas) {
-		filter: saturate(0.32) brightness(1.06) contrast(0.92);
+		filter: saturate(0.6) brightness(1.04) contrast(0.95);
 	}
+	/* Dark mode: keep the OSM raster legible — no `invert` (would flip the
+	   bus dot colors that share the canvas), no aggressive darkening. The
+	   dark UI chrome around the map carries the dark-mode identity; the map
+	   itself stays a quiet, slightly muted version of light. */
 	@media (prefers-color-scheme: dark) {
 		.map-root::after {
-			background: oklch(16% 0.012 32 / 0.55);
+			background: oklch(28% 0.014 32 / 0.18);
 			mix-blend-mode: multiply;
 		}
 		:global(.map-canvas .maplibregl-canvas) {
-			filter: saturate(0.25) brightness(0.62) contrast(0.95) invert(0.92) hue-rotate(180deg);
+			filter: saturate(0.55) brightness(0.96) contrast(0.98);
 		}
 	}
 	:global(.maplibregl-ctrl-attrib) {

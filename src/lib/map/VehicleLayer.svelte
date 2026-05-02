@@ -67,9 +67,9 @@
 			source: SRC_ID,
 			paint: {
 				'circle-color': ['get', 'color'],
-				'circle-opacity': ['interpolate', ['linear'], ['zoom'], 10, 0.15, 14, 0.35],
-				'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 6, 14, 14, 17, 22],
-				'circle-blur': 0.6
+				'circle-opacity': ['interpolate', ['linear'], ['zoom'], 10, 0.22, 14, 0.45],
+				'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 8, 14, 16, 17, 24],
+				'circle-blur': 0.55
 			}
 		});
 
@@ -79,9 +79,9 @@
 			source: SRC_ID,
 			paint: {
 				'circle-color': ['get', 'color'],
-				'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 3.5, 14, 5, 17, 8],
+				'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 4.5, 14, 6.5, 17, 10],
 				'circle-stroke-color': '#fbf7f7',
-				'circle-stroke-width': 1.4,
+				'circle-stroke-width': 1.8,
 				'circle-pitch-alignment': 'map'
 			}
 		});
