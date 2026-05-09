@@ -5,6 +5,12 @@ class StopsStore {
 	loaded = $state(false);
 	error = $state<string | null>(null);
 
+	byId = $derived.by(() => {
+		const m = new Map<string, Stop>();
+		for (const s of this.stops) m.set(s.id, s);
+		return m;
+	});
+
 	async load(): Promise<void> {
 		if (this.loaded) return;
 		try {
