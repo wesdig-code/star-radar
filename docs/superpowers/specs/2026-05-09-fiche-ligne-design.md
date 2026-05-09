@@ -32,12 +32,12 @@ Tri intra-section : `currentStopSequence` décroissant (les bus les plus proches
 
 Format de row :
 
-| État | Format |
-|---|---|
-| `IN_TRANSIT_TO` / `INCOMING_AT` | `<prev_name>  →  <next_name>` |
-| `STOPPED_AT` | `● <stop_name>` (pastille tinted-neutral, pas de flèche) |
-| Premier arrêt du pattern | `Départ · → <next>` |
-| Dernier arrêt du pattern | `<prev> → Terminus` |
+| État                            | Format                                                   |
+| ------------------------------- | -------------------------------------------------------- |
+| `IN_TRANSIT_TO` / `INCOMING_AT` | `<prev_name>  →  <next_name>`                            |
+| `STOPPED_AT`                    | `● <stop_name>` (pastille tinted-neutral, pas de flèche) |
+| Premier arrêt du pattern        | `Départ · → <next>`                                      |
+| Dernier arrêt du pattern        | `<prev> → Terminus`                                      |
 
 Le `→` est une vraie flèche unicode. Les compteurs et codes ligne sont en mono à chiffres tabulaires (Tabular-Mono Rule).
 
@@ -49,15 +49,15 @@ Tap row → `selectionStore.selectVehicle(id)` (passe à `DrillBus`) + `map.flyT
 
 ### Cas limites
 
-| Cas | Comportement v1 |
-|---|---|
-| Bus sans `tripId` | Section dédiée `« Position GPS uniquement »` en bas, sans prev/next. |
-| `tripId` absent de l'index (trip ajouté depuis le dernier build) | Idem + `console.warn` côté client pour estimer la fréquence. |
-| `currentStopSequence === 0` | Pas de prev → row affiche `Départ · → <next>`. |
-| Dernier arrêt du pattern | Pas de next → row affiche `<prev> → Terminus`. |
-| 0 bus en circulation | Empty state : « Aucun bus en circulation pour cette ligne pour le moment. » |
-| Ligne monodirectionnelle | Une seule section, sans changement de mise en forme. |
-| `trip-stops.json` échoue à charger | Skeleton court puis fallback global sur « Position GPS uniquement ». |
+| Cas                                                              | Comportement v1                                                             |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Bus sans `tripId`                                                | Section dédiée `« Position GPS uniquement »` en bas, sans prev/next.        |
+| `tripId` absent de l'index (trip ajouté depuis le dernier build) | Idem + `console.warn` côté client pour estimer la fréquence.                |
+| `currentStopSequence === 0`                                      | Pas de prev → row affiche `Départ · → <next>`.                              |
+| Dernier arrêt du pattern                                         | Pas de next → row affiche `<prev> → Terminus`.                              |
+| 0 bus en circulation                                             | Empty state : « Aucun bus en circulation pour cette ligne pour le moment. » |
+| Ligne monodirectionnelle                                         | Une seule section, sans changement de mise en forme.                        |
+| `trip-stops.json` échoue à charger                               | Skeleton court puis fallback global sur « Position GPS uniquement ».        |
 
 ## Architecture
 
@@ -72,10 +72,10 @@ Tap row → `selectionStore.selectVehicle(id)` (passe à `DrillBus`) + `map.flyT
 
 ```json
 {
-  "patterns": [
-    { "stops": ["1003", "1004", "1007"], "headsign": "Vers République", "direction": 0 }
-  ],
-  "trips": { "<trip_id>": 0 }
+	"patterns": [
+		{ "stops": ["1003", "1004", "1007"], "headsign": "Vers République", "direction": 0 }
+	],
+	"trips": { "<trip_id>": 0 }
 }
 ```
 

@@ -15,6 +15,7 @@
 ## File Map
 
 **Created:**
+
 - `scripts/build-trip-stops.mjs` — fetches STAR's GTFS static zip, dedups patterns, writes the index.
 - `static/trip-stops.json` — generated artifact, committed.
 - `src/lib/star/line-detail.ts` — pure helpers (`computeVehicleStops`, `groupByDirection`).
@@ -22,6 +23,7 @@
 - `src/lib/stores/trip-stops.svelte.ts` — lazy client store.
 
 **Modified:**
+
 - `src/lib/star/types.ts` — add `currentStopSequence`, `stopId`, `currentStatus` to `Vehicle`; add `TripPattern`, `TripStopsIndex`.
 - `src/lib/star/api.ts` — extend `fetchVehiclePositions` to extract the three new fields.
 - `src/lib/stores/stops.svelte.ts` — add `byId` derived getter.
@@ -35,6 +37,7 @@
 ## Task 1 — Enrich `Vehicle` and extract GTFS-RT stop fields
 
 **Files:**
+
 - Modify: `src/lib/star/types.ts`
 - Modify: `src/lib/star/api.ts`
 - Test: `src/lib/star/api.test.ts` (new — small unit test using a synthetic protobuf)
@@ -221,6 +224,7 @@ EOF
 ## Task 2 — Add CSV/zip dev-deps and write `build-trip-stops.mjs`
 
 **Files:**
+
 - Modify: `package.json`
 - Create: `scripts/build-trip-stops.mjs`
 
@@ -357,6 +361,7 @@ EOF
 ## Task 3 — Wire `build:trip-stops` and ignore the JSON in Prettier
 
 **Files:**
+
 - Modify: `package.json`
 - Modify: `.prettierignore`
 
@@ -401,6 +406,7 @@ EOF
 ## Task 4 — Pure helpers `computeVehicleStops` and `groupByDirection`
 
 **Files:**
+
 - Modify: `src/lib/star/types.ts`
 - Create: `src/lib/star/line-detail.ts`
 - Create: `src/lib/star/line-detail.test.ts`
@@ -630,10 +636,7 @@ export interface DirectionGroup {
 	vehicles: Vehicle[];
 }
 
-export function groupByDirection(
-	vehicles: Vehicle[],
-	index: TripStopsIndex
-): DirectionGroup[];
+export function groupByDirection(vehicles: Vehicle[], index: TripStopsIndex): DirectionGroup[];
 export function groupByDirection(
 	vehicles: Vehicle[],
 	index: TripStopsIndex,
@@ -700,6 +703,7 @@ EOF
 ## Task 5 — Stop lookup map and `tripStopsStore`
 
 **Files:**
+
 - Modify: `src/lib/stores/stops.svelte.ts`
 - Create: `src/lib/stores/trip-stops.svelte.ts`
 
@@ -796,6 +800,7 @@ EOF
 ## Task 6 — Render the body of `DrillLine`
 
 **Files:**
+
 - Modify: `src/lib/ui/DrillLine.svelte`
 
 - [ ] **Step 1: Replace the file**
@@ -823,9 +828,7 @@ Replace the full contents of `src/lib/ui/DrillLine.svelte` with the version belo
 	});
 
 	const line = $derived(linesStore.byCode.get(lineCode));
-	const lineVehicles = $derived(
-		vehiclesStore.vehicles.filter((v) => v.lineCode === lineCode)
-	);
+	const lineVehicles = $derived(vehiclesStore.vehicles.filter((v) => v.lineCode === lineCode));
 	const onlineCount = $derived(lineVehicles.length);
 
 	const grouped = $derived.by(() => {
@@ -1091,6 +1094,7 @@ EOF
 ## Task 7 — Bump radius `+1 px` for selected-line buses
 
 **Files:**
+
 - Modify: `src/lib/map/VehicleLayer.svelte`
 
 The dim-on-line-selection logic already exists (lines 155–184). We only refine the radius for the selected line so its buses feel emphasized.
@@ -1100,12 +1104,12 @@ The dim-on-line-selection logic already exists (lines 155–184). We only refine
 In `src/lib/map/VehicleLayer.svelte`, locate the call to `map.setPaintProperty(LAYER_DOT, 'circle-radius', …)` inside the `if (filterCode)` block (currently a default expression at lines 172–183). Replace it with the case expression below so matched buses get a tiny size bump:
 
 ```ts
-			map.setPaintProperty(LAYER_DOT, 'circle-radius', [
-				'case',
-				['==', ['get', 'lineCode'], filterCode],
-				['interpolate', ['linear'], ['zoom'], 10, 6, 14, 10, 17, 15],
-				['interpolate', ['linear'], ['zoom'], 10, 5, 14, 9, 17, 14]
-			] as never);
+map.setPaintProperty(LAYER_DOT, 'circle-radius', [
+	'case',
+	['==', ['get', 'lineCode'], filterCode],
+	['interpolate', ['linear'], ['zoom'], 10, 6, 14, 10, 17, 15],
+	['interpolate', ['linear'], ['zoom'], 10, 5, 14, 9, 17, 14]
+] as never);
 ```
 
 - [ ] **Step 2: Run check and lint**
