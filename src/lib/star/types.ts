@@ -51,6 +51,7 @@ export interface TripPattern {
 export interface TripStopsIndex {
 	patterns: TripPattern[];
 	trips: Record<string, number>;
+	stopNames: Record<string, string>;
 }
 
 export interface VehicleSnapshot {

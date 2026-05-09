@@ -51,15 +51,17 @@ function indexStopsByTrip(stopTimes) {
 	return byTrip;
 }
 
-function buildIndex(trips, stopsByTrip) {
+function buildIndex(trips, stopsByTrip, stopNamesAll) {
 	const patternKey = new Map();
 	const patterns = [];
 	const tripsMap = {};
+	const referencedStopIds = new Set();
 
 	for (const t of trips) {
 		const ordered = stopsByTrip.get(t.trip_id);
 		if (!ordered || ordered.length === 0) continue;
 		const stops = ordered.map((s) => s.stop_id);
+		for (const id of stops) referencedStopIds.add(id);
 		const headsign = (t.trip_headsign ?? '').trim();
 		const direction = Number(t.direction_id ?? 0);
 		const key = `${direction}|${headsign}|${stops.join(',')}`;
@@ -72,7 +74,24 @@ function buildIndex(trips, stopsByTrip) {
 		tripsMap[t.trip_id] = idx;
 	}
 
-	return { patterns, trips: tripsMap };
+	// Only ship names for stops actually referenced by a kept pattern. STAR's
+	// stops.txt has more rows (deprecated stops, internal-only ones), no point
+	// inflating the artifact with names nobody will look up.
+	const stopNames = {};
+	for (const id of referencedStopIds) {
+		const name = stopNamesAll.get(id);
+		if (name) stopNames[id] = name;
+	}
+
+	return { patterns, trips: tripsMap, stopNames };
+}
+
+function indexStopNames(stops) {
+	const m = new Map();
+	for (const row of stops) {
+		if (row.stop_id && row.stop_name) m.set(row.stop_id, row.stop_name);
+	}
+	return m;
 }
 
 const start = Date.now();
@@ -81,16 +100,20 @@ const buf = await downloadZip(GTFS_ZIP_URL);
 const zip = new AdmZip(buf);
 const trips = parseCsv(readZipEntry(zip, 'trips.txt'));
 const stopTimes = parseCsv(readZipEntry(zip, 'stop_times.txt'));
-console.log(`Parsed ${trips.length} trips, ${stopTimes.length} stop_times rows`);
+const stops = parseCsv(readZipEntry(zip, 'stops.txt'));
+console.log(
+	`Parsed ${trips.length} trips, ${stopTimes.length} stop_times rows, ${stops.length} stops`
+);
 
 const stopsByTrip = indexStopsByTrip(stopTimes);
-const index = buildIndex(trips, stopsByTrip);
+const stopNamesAll = indexStopNames(stops);
+const index = buildIndex(trips, stopsByTrip, stopNamesAll);
 
 mkdirSync(dirname(OUT_PATH), { recursive: true });
 writeFileSync(OUT_PATH, JSON.stringify(index));
 
 const elapsed = ((Date.now() - start) / 1000).toFixed(1);
 console.log(
-	`✓ wrote ${index.patterns.length} patterns / ${Object.keys(index.trips).length} trips ` +
-		`to static/trip-stops.json in ${elapsed}s`
+	`✓ wrote ${index.patterns.length} patterns / ${Object.keys(index.trips).length} trips / ` +
+		`${Object.keys(index.stopNames).length} stop names to static/trip-stops.json in ${elapsed}s`
 );

@@ -1,4 +1,4 @@
-import type { Stop, TripStopsIndex, Vehicle } from './types';
+import type { TripStopsIndex, Vehicle } from './types';
 
 type StopRef = { id: string; name: string };
 
@@ -11,17 +11,12 @@ export interface VehicleStops {
 	status: VehicleRowStatus;
 }
 
-function refOf(stopId: string | null, stopsById: Map<string, Stop>): StopRef | null {
+function refOf(stopId: string | null, index: TripStopsIndex): StopRef | null {
 	if (!stopId) return null;
-	const s = stopsById.get(stopId);
-	return { id: stopId, name: s?.name ?? stopId };
+	return { id: stopId, name: index.stopNames[stopId] ?? stopId };
 }
 
-export function computeVehicleStops(
-	vehicle: Vehicle,
-	index: TripStopsIndex,
-	stopsById: Map<string, Stop>
-): VehicleStops {
+export function computeVehicleStops(vehicle: Vehicle, index: TripStopsIndex): VehicleStops {
 	const tripId = vehicle.tripId;
 	if (!tripId) return { prev: null, next: null, current: null, status: 'unknown' };
 	const patternIdx = index.trips[tripId];
@@ -40,9 +35,9 @@ export function computeVehicleStops(
 		const prev = idx > 0 ? pattern.stops[idx - 1] : null;
 		const next = idx < pattern.stops.length - 1 ? pattern.stops[idx + 1] : null;
 		return {
-			prev: refOf(prev, stopsById),
-			next: refOf(next, stopsById),
-			current: refOf(pattern.stops[idx], stopsById),
+			prev: refOf(prev, index),
+			next: refOf(next, index),
+			current: refOf(pattern.stops[idx], index),
 			status: 'stopped'
 		};
 	}
@@ -52,8 +47,8 @@ export function computeVehicleStops(
 	const isEnd = idx === pattern.stops.length - 1;
 	const prev = isStart ? null : pattern.stops[idx - 1];
 	return {
-		prev: refOf(prev, stopsById),
-		next: refOf(pattern.stops[idx], stopsById),
+		prev: refOf(prev, index),
+		next: refOf(pattern.stops[idx], index),
 		current: null,
 		status: isStart ? 'departure' : isEnd ? 'arrived' : 'transit'
 	};

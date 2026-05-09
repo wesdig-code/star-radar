@@ -1,21 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { computeVehicleStops, groupByDirection } from './line-detail';
-import type { Stop, TripStopsIndex, Vehicle } from './types';
-
-const stopsById = new Map<string, Stop>(
-	[
-		{ id: 's1', code: 's1', name: 'Donzelot', lng: 0, lat: 0, lineCodes: [], wheelchair: false },
-		{ id: 's2', code: 's2', name: 'Gallet', lng: 0, lat: 0, lineCodes: [], wheelchair: false },
-		{ id: 's3', code: 's3', name: 'Métro Cesson', lng: 0, lat: 0, lineCodes: [], wheelchair: false }
-	].map((s) => [s.id, s])
-);
+import type { TripStopsIndex, Vehicle } from './types';
 
 const index: TripStopsIndex = {
 	patterns: [
 		{ stops: ['s1', 's2', 's3'], headsign: 'Vers République', direction: 0 },
 		{ stops: ['s3', 's2', 's1'], headsign: 'Vers Cesson', direction: 1 }
 	],
-	trips: { 'trip-A': 0, 'trip-B': 1 }
+	trips: { 'trip-A': 0, 'trip-B': 1 },
+	stopNames: { s1: 'Donzelot', s2: 'Gallet', s3: 'Métro Cesson' }
 };
 
 function v(over: Partial<Vehicle>): Vehicle {
@@ -26,8 +19,7 @@ describe('computeVehicleStops', () => {
 	it('returns prev=null and next=stopId when bus is at the first stop, in transit', () => {
 		const r = computeVehicleStops(
 			v({ tripId: 'trip-A', stopId: 's1', currentStatus: 'IN_TRANSIT_TO' }),
-			index,
-			stopsById
+			index
 		);
 		expect(r.status).toBe('departure');
 		expect(r.prev).toBeNull();
@@ -37,8 +29,7 @@ describe('computeVehicleStops', () => {
 	it('returns prev = previous stop and next = stopId in transit mid-trip', () => {
 		const r = computeVehicleStops(
 			v({ tripId: 'trip-A', stopId: 's2', currentStatus: 'IN_TRANSIT_TO' }),
-			index,
-			stopsById
+			index
 		);
 		expect(r.status).toBe('transit');
 		expect(r.prev).toEqual({ id: 's1', name: 'Donzelot' });
@@ -48,8 +39,7 @@ describe('computeVehicleStops', () => {
 	it('returns stopped state when STOPPED_AT, with current = stopId, prev = previous, next = next-after', () => {
 		const r = computeVehicleStops(
 			v({ tripId: 'trip-A', stopId: 's2', currentStatus: 'STOPPED_AT' }),
-			index,
-			stopsById
+			index
 		);
 		expect(r.status).toBe('stopped');
 		expect(r.current).toEqual({ id: 's2', name: 'Gallet' });
@@ -60,20 +50,17 @@ describe('computeVehicleStops', () => {
 	it('leaves current = null in transit / departure / arrived states', () => {
 		const transit = computeVehicleStops(
 			v({ tripId: 'trip-A', stopId: 's2', currentStatus: 'IN_TRANSIT_TO' }),
-			index,
-			stopsById
+			index
 		);
 		expect(transit.current).toBeNull();
 		const departure = computeVehicleStops(
 			v({ tripId: 'trip-A', stopId: 's1', currentStatus: 'IN_TRANSIT_TO' }),
-			index,
-			stopsById
+			index
 		);
 		expect(departure.current).toBeNull();
 		const arrived = computeVehicleStops(
 			v({ tripId: 'trip-A', stopId: 's3', currentStatus: 'IN_TRANSIT_TO' }),
-			index,
-			stopsById
+			index
 		);
 		expect(arrived.current).toBeNull();
 	});
@@ -81,8 +68,7 @@ describe('computeVehicleStops', () => {
 	it('returns terminus state when next stop is the last in the pattern, in transit', () => {
 		const r = computeVehicleStops(
 			v({ tripId: 'trip-A', stopId: 's3', currentStatus: 'IN_TRANSIT_TO' }),
-			index,
-			stopsById
+			index
 		);
 		expect(r.status).toBe('arrived');
 		expect(r.prev).toEqual({ id: 's2', name: 'Gallet' });
@@ -90,7 +76,7 @@ describe('computeVehicleStops', () => {
 	});
 
 	it('returns unknown when tripId is missing', () => {
-		const r = computeVehicleStops(v({ stopId: 's2' }), index, stopsById);
+		const r = computeVehicleStops(v({ stopId: 's2' }), index);
 		expect(r.status).toBe('unknown');
 		expect(r.prev).toBeNull();
 		expect(r.next).toBeNull();
@@ -99,8 +85,7 @@ describe('computeVehicleStops', () => {
 	it('returns unknown when tripId is not in the index', () => {
 		const r = computeVehicleStops(
 			v({ tripId: 'trip-Z', stopId: 's2', currentStatus: 'IN_TRANSIT_TO' }),
-			index,
-			stopsById
+			index
 		);
 		expect(r.status).toBe('unknown');
 	});
@@ -108,17 +93,19 @@ describe('computeVehicleStops', () => {
 	it('returns unknown when stopId is not present in the trip pattern', () => {
 		const r = computeVehicleStops(
 			v({ tripId: 'trip-A', stopId: 'unknown-stop', currentStatus: 'IN_TRANSIT_TO' }),
-			index,
-			stopsById
+			index
 		);
 		expect(r.status).toBe('unknown');
 	});
 
-	it('falls back to the stop id as name when the stop is not in stopsById', () => {
+	it('falls back to the stop id as name when the stop id is not in stopNames', () => {
+		const sparseIndex: TripStopsIndex = {
+			...index,
+			stopNames: { s1: 'Donzelot', s3: 'Métro Cesson' } // s2 missing
+		};
 		const r = computeVehicleStops(
 			v({ tripId: 'trip-A', stopId: 's2', currentStatus: 'IN_TRANSIT_TO' }),
-			index,
-			new Map()
+			sparseIndex
 		);
 		expect(r.next).toEqual({ id: 's2', name: 's2' });
 	});

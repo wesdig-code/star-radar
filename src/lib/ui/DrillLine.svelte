@@ -4,7 +4,6 @@
 	import { linesStore } from '$lib/stores/lines.svelte';
 	import { vehiclesStore } from '$lib/stores/vehicles.svelte';
 	import { selectionStore } from '$lib/stores/selection.svelte';
-	import { stopsStore } from '$lib/stores/stops.svelte';
 	import { tripStopsStore } from '$lib/stores/trip-stops.svelte';
 	import { computeVehicleStops, groupByDirection } from '$lib/star/line-detail';
 	import type { Vehicle } from '$lib/star/types';
@@ -14,7 +13,6 @@
 
 	$effect(() => {
 		void tripStopsStore.load();
-		void stopsStore.load();
 	});
 
 	const line = $derived(linesStore.byCode.get(lineCode));
@@ -29,8 +27,8 @@
 
 	function rowOf(v: Vehicle) {
 		const idx = tripStopsStore.index;
-		if (!idx) return { status: 'unknown' as const, prev: null, next: null };
-		return computeVehicleStops(v, idx, stopsStore.byId);
+		if (!idx) return { status: 'unknown' as const, prev: null, next: null, current: null };
+		return computeVehicleStops(v, idx);
 	}
 
 	function sequenceFor(v: Vehicle): number {
