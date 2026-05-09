@@ -60,6 +60,13 @@
 			--surface-fg-soft: oklch(72% 0.008 32);
 			--surface-elev: oklch(22% 0.014 32 / 0.92);
 			--surface-divider: oklch(28% 0.012 32);
+			/* Cream tokens drift to dark variants in dark mode so any component
+			   using them as "elevated neutral surface" (hover backgrounds, input
+			   chrome, etc.) stays readable against the dark --surface-fg. Without
+			   this, --color-cream-deep stays light cream and white text lands on
+			   it (cf. issues #9 / #10). */
+			--color-cream: oklch(20% 0.01 32);
+			--color-cream-deep: oklch(25% 0.014 32);
 		}
 	}
 
