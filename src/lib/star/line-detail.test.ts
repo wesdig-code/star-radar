@@ -45,15 +45,37 @@ describe('computeVehicleStops', () => {
 		expect(r.next).toEqual({ id: 's2', name: 'Gallet' });
 	});
 
-	it('returns stopped state when STOPPED_AT, with prev = previous and next = next-after', () => {
+	it('returns stopped state when STOPPED_AT, with current = stopId, prev = previous, next = next-after', () => {
 		const r = computeVehicleStops(
 			v({ tripId: 'trip-A', stopId: 's2', currentStatus: 'STOPPED_AT' }),
 			index,
 			stopsById
 		);
 		expect(r.status).toBe('stopped');
+		expect(r.current).toEqual({ id: 's2', name: 'Gallet' });
 		expect(r.prev).toEqual({ id: 's1', name: 'Donzelot' });
 		expect(r.next).toEqual({ id: 's3', name: 'Métro Cesson' });
+	});
+
+	it('leaves current = null in transit / departure / arrived states', () => {
+		const transit = computeVehicleStops(
+			v({ tripId: 'trip-A', stopId: 's2', currentStatus: 'IN_TRANSIT_TO' }),
+			index,
+			stopsById
+		);
+		expect(transit.current).toBeNull();
+		const departure = computeVehicleStops(
+			v({ tripId: 'trip-A', stopId: 's1', currentStatus: 'IN_TRANSIT_TO' }),
+			index,
+			stopsById
+		);
+		expect(departure.current).toBeNull();
+		const arrived = computeVehicleStops(
+			v({ tripId: 'trip-A', stopId: 's3', currentStatus: 'IN_TRANSIT_TO' }),
+			index,
+			stopsById
+		);
+		expect(arrived.current).toBeNull();
 	});
 
 	it('returns terminus state when next stop is the last in the pattern, in transit', () => {

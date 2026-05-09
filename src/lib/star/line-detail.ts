@@ -7,6 +7,7 @@ export type VehicleRowStatus = 'transit' | 'stopped' | 'departure' | 'arrived' |
 export interface VehicleStops {
 	prev: StopRef | null;
 	next: StopRef | null;
+	current: StopRef | null;
 	status: VehicleRowStatus;
 }
 
@@ -22,21 +23,26 @@ export function computeVehicleStops(
 	stopsById: Map<string, Stop>
 ): VehicleStops {
 	const tripId = vehicle.tripId;
-	if (!tripId) return { prev: null, next: null, status: 'unknown' };
+	if (!tripId) return { prev: null, next: null, current: null, status: 'unknown' };
 	const patternIdx = index.trips[tripId];
-	if (patternIdx === undefined) return { prev: null, next: null, status: 'unknown' };
+	if (patternIdx === undefined) return { prev: null, next: null, current: null, status: 'unknown' };
 	const pattern = index.patterns[patternIdx];
-	if (!pattern || !vehicle.stopId) return { prev: null, next: null, status: 'unknown' };
+	if (!pattern || !vehicle.stopId)
+		return { prev: null, next: null, current: null, status: 'unknown' };
 
 	const idx = pattern.stops.indexOf(vehicle.stopId);
-	if (idx < 0) return { prev: null, next: null, status: 'unknown' };
+	if (idx < 0) return { prev: null, next: null, current: null, status: 'unknown' };
 
 	if (vehicle.currentStatus === 'STOPPED_AT') {
+		// `current` is what the bus is desserving right now — the only one a
+		// rider needs in this state. `prev` and `next` round out the adjacency
+		// for callers that want it.
 		const prev = idx > 0 ? pattern.stops[idx - 1] : null;
 		const next = idx < pattern.stops.length - 1 ? pattern.stops[idx + 1] : null;
 		return {
 			prev: refOf(prev, stopsById),
 			next: refOf(next, stopsById),
+			current: refOf(pattern.stops[idx], stopsById),
 			status: 'stopped'
 		};
 	}
@@ -48,6 +54,7 @@ export function computeVehicleStops(
 	return {
 		prev: refOf(prev, stopsById),
 		next: refOf(pattern.stops[idx], stopsById),
+		current: null,
 		status: isStart ? 'departure' : isEnd ? 'arrived' : 'transit'
 	};
 }

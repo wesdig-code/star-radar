@@ -87,7 +87,7 @@
 							<button class="row" type="button" onclick={() => selectVehicle(v.id)}>
 								{#if r.status === 'stopped'}
 									<span class="dot stopped" aria-hidden="true"></span>
-									<span class="stop">{r.next?.name ?? r.prev?.name ?? '—'}</span>
+									<span class="stop">{r.current?.name ?? '—'}</span>
 									<span class="muted">à l'arrêt</span>
 								{:else if r.status === 'departure'}
 									<span class="muted">Départ</span>
