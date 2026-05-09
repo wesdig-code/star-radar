@@ -42,6 +42,17 @@ export interface Vehicle {
 	currentStatus?: VehicleStopStatus;
 }
 
+export interface TripPattern {
+	stops: string[];
+	headsign: string;
+	direction: number;
+}
+
+export interface TripStopsIndex {
+	patterns: TripPattern[];
+	trips: Record<string, number>;
+}
+
 export interface VehicleSnapshot {
 	updatedAt: number;
 	source: 'live' | 'stale';
