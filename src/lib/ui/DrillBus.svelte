@@ -12,10 +12,18 @@
 	const vehicle = $derived(vehiclesStore.vehicles.find((v) => v.id === vehicleId));
 	const line = $derived(vehicle?.lineCode ? linesStore.byCode.get(vehicle.lineCode) : undefined);
 	const speed = $derived(vehicle?.speed != null ? `${Math.round(vehicle.speed * 3.6)} km/h` : null);
+
+	// Drill out one level: if the bus belongs to a known line, "back" returns
+	// to that line's drill (so a rider that came from DrillLine doesn't lose
+	// context). Falls back to clearing the selection if there's no line.
+	function back(): void {
+		if (vehicle?.lineCode) selectionStore.selectLine(vehicle.lineCode);
+		else selectionStore.clear();
+	}
 </script>
 
 <header class="drill">
-	<button class="back" type="button" onclick={() => selectionStore.clear()} aria-label="Fermer">
+	<button class="back" type="button" onclick={back} aria-label="Retour">
 		<svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
 			<path
 				d="m6 6 12 12M18 6 6 18"
