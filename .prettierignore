@@ -9,3 +9,4 @@ playwright-report
 test-results
 .claude/settings.local.json
 static/stops.json
+static/trip-stops.json
