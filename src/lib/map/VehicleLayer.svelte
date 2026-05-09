@@ -170,16 +170,11 @@
 			const dimLabel = ['case', ['==', ['get', 'lineCode'], filterCode], 1, 0.15] as never;
 			map.setPaintProperty(LAYER_LABEL, 'text-opacity', dimLabel);
 			map.setPaintProperty(LAYER_DOT, 'circle-radius', [
-				'interpolate',
-				['linear'],
-				['zoom'],
-				10,
-				5,
-				14,
-				9,
-				17,
-				14
-			]);
+				'case',
+				['==', ['get', 'lineCode'], filterCode],
+				['interpolate', ['linear'], ['zoom'], 10, 6, 14, 10, 17, 15],
+				['interpolate', ['linear'], ['zoom'], 10, 5, 14, 9, 17, 14]
+			] as never);
 			return;
 		}
 
