@@ -2,12 +2,12 @@ import type { Stop, TripStopsIndex, Vehicle } from './types';
 
 type StopRef = { id: string; name: string };
 
-export type VehicleStopStatus = 'transit' | 'stopped' | 'departure' | 'arrived' | 'unknown';
+export type VehicleRowStatus = 'transit' | 'stopped' | 'departure' | 'arrived' | 'unknown';
 
 export interface VehicleStops {
 	prev: StopRef | null;
 	next: StopRef | null;
-	status: VehicleStopStatus;
+	status: VehicleRowStatus;
 }
 
 function refOf(stopId: string | null, stopsById: Map<string, Stop>): StopRef | null {
