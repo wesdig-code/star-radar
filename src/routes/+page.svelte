@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import Map from '$lib/map/Map.svelte';
 	import VehicleLayer from '$lib/map/VehicleLayer.svelte';
 	import StopLayer from '$lib/map/StopLayer.svelte';
@@ -22,6 +23,29 @@
 	let mapRef = $state<MapLibreMap | undefined>();
 	let sheetSnap = $state<'peek' | 'mid' | 'full'>('peek');
 	let query = $state('');
+	let lastFlownVehicleId: string | null = null;
+
+	// Pan to a vehicle when it gets selected (typically from a DrillLine row).
+	// Untracking the vehicles list keeps us out of the 12 s poll cycle — we
+	// only re-fly when the selection itself changes.
+	$effect(() => {
+		const sel = selectionStore.current;
+		const map = mapRef;
+		if (!map) return;
+		const id = sel.kind === 'vehicle' ? sel.vehicleId : null;
+		if (id === lastFlownVehicleId) return;
+		lastFlownVehicleId = id;
+		if (!id) return;
+		const v = untrack(() => vehiclesStore.vehicles.find((x) => x.id === id));
+		if (!v) return;
+		map.flyTo({
+			center: [v.lng, v.lat],
+			zoom: Math.max(14, map.getZoom()),
+			essential: true,
+			duration: 700,
+			easing: (t) => 1 - Math.pow(1 - t, 4)
+		});
+	});
 
 	const filtered = $derived.by(() => {
 		const q = query.trim().toLowerCase();
