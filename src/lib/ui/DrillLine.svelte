@@ -67,7 +67,12 @@
 </header>
 
 <div class="body">
-	{#if onlineCount === 0}
+	{#if line?.mode === 'metro'}
+		<p class="empty">
+			Le métro n'est pas suivi en temps réel par STAR. Les perturbations apparaissent dans le
+			bandeau d'alerte si nécessaire.
+		</p>
+	{:else if onlineCount === 0}
 		<p class="empty">Aucun bus en circulation pour cette ligne pour le moment.</p>
 	{:else if !tripStopsStore.index && tripStopsStore.loading}
 		<p class="skeleton">Chargement des trajets…</p>
