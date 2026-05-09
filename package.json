@@ -6,7 +6,8 @@
 	"description": "Live map of the STAR public transport network in Rennes",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build",
+		"build": "node scripts/build-stops.mjs && vite build",
+		"build:stops": "node scripts/build-stops.mjs",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",

@@ -4,7 +4,7 @@
  */
 
 import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
-import type { Line, Stop, Vehicle } from './types';
+import type { Line, Vehicle } from './types';
 
 const ODS_BASE = 'https://data.explore.star.fr/api/explore/v2.1/catalog/datasets';
 const GTFS_RT_VEHICLE_POSITIONS =
@@ -29,23 +29,6 @@ interface OdsLine {
 	visibilite?: string;
 	nomfamillecommerciale?: string;
 	route_id?: string;
-}
-
-interface OdsStop {
-	id?: string;
-	code?: string;
-	nom?: string;
-	nomcommune?: string;
-	coordonnees?: { lon: number; lat: number };
-	estaccessiblepmr?: string;
-	stop_id?: string;
-}
-
-interface OdsDesserte {
-	idligne?: string;
-	nomcourtligne?: string;
-	idarret?: string;
-	stop_id?: string;
 }
 
 function normalizeColor(raw: string | undefined): string {
@@ -129,53 +112,6 @@ export async function fetchLines(fetchImpl: typeof fetch): Promise<Line[]> {
 		seen.add(l.code);
 		return true;
 	});
-}
-
-export async function fetchStops(fetchImpl: typeof fetch, limit = 1000): Promise<Stop[]> {
-	const [records, dessertes] = await Promise.all([
-		fetchAllRecords<OdsStop>(
-			fetchImpl,
-			'tco-bus-topologie-pointsarret-td',
-			Math.min(100, limit),
-			2500
-		),
-		// `dessertes` records are essentially `stop_times.txt` rows: one per
-		// (parcours, stop). 8.4k rows on the STAR network — small enough to
-		// fold into a `stop_id → [lineCode]` index server-side once a day.
-		fetchAllRecords<OdsDesserte>(fetchImpl, 'tco-bus-topologie-dessertes-td', 100, 12_000)
-	]);
-
-	const linesByStop = new Map<string, Set<string>>();
-	for (const d of dessertes) {
-		const stopId = (d.idarret ?? d.stop_id ?? '').toString();
-		const lineCode = d.nomcourtligne ?? d.idligne;
-		if (!stopId || !lineCode) continue;
-		const set = linesByStop.get(stopId) ?? new Set<string>();
-		set.add(lineCode);
-		linesByStop.set(stopId, set);
-	}
-
-	return records
-		.slice(0, limit)
-		.map((r): Stop | null => {
-			const point = r.coordonnees;
-			if (!point) return null;
-			const id = (r.id ?? r.code ?? r.stop_id ?? '').toString();
-			if (!id) return null;
-			const lines = linesByStop.get(id) ?? new Set<string>();
-			return {
-				id,
-				code: r.code ?? id,
-				name: r.nom ?? id,
-				lng: point.lon,
-				lat: point.lat,
-				lineCodes: [...lines].sort((a, b) =>
-					a.localeCompare(b, 'fr', { numeric: true, sensitivity: 'base' })
-				),
-				wheelchair: /true|oui|1/i.test(r.estaccessiblepmr ?? '')
-			};
-		})
-		.filter((s): s is Stop => s !== null);
 }
 
 let linesCache: { lines: Line[]; routeIndex: Map<string, string>; expires: number } | null = null;

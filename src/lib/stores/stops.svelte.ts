@@ -8,7 +8,7 @@ class StopsStore {
 	async load(): Promise<void> {
 		if (this.loaded) return;
 		try {
-			const res = await fetch('/api/stops?limit=2000');
+			const res = await fetch('/stops.json');
 			if (!res.ok) {
 				this.error = `status ${res.status}`;
 				return;
