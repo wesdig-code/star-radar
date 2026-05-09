@@ -4,7 +4,7 @@
  */
 
 import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
-import type { Line, Vehicle } from './types';
+import type { Line, Vehicle, VehicleStopStatus } from './types';
 
 const ODS_BASE = 'https://data.explore.star.fr/api/explore/v2.1/catalog/datasets';
 const GTFS_RT_VEHICLE_POSITIONS =
@@ -133,6 +133,31 @@ export async function getLinesAndIndex(
 	return { lines, routeIndex };
 }
 
+const VehicleStopStatusEnum =
+	GtfsRealtimeBindings.transit_realtime.VehiclePosition.VehicleStopStatus;
+
+function vehicleStatus(raw: number | null | undefined): VehicleStopStatus | undefined {
+	if (raw == null) return undefined;
+	switch (raw) {
+		case VehicleStopStatusEnum.INCOMING_AT:
+			return 'INCOMING_AT';
+		case VehicleStopStatusEnum.STOPPED_AT:
+			return 'STOPPED_AT';
+		case VehicleStopStatusEnum.IN_TRANSIT_TO:
+			return 'IN_TRANSIT_TO';
+		default:
+			return undefined;
+	}
+}
+
+// protobufjs decodes scalar fields with default values from the prototype, so
+// `v.currentStopSequence` is `0` and `v.currentStatus` is `IN_TRANSIT_TO` (2)
+// even when the upstream feed didn't set them. Presence detection requires
+// looking at own-properties — that's how we tell "really 0" from "absent".
+function hasOwn(target: object, key: string): boolean {
+	return Object.prototype.hasOwnProperty.call(target, key);
+}
+
 export async function fetchVehiclePositions(
 	fetchImpl: typeof fetch
 ): Promise<{ vehicles: Vehicle[]; updatedAt: number }> {
@@ -167,7 +192,12 @@ export async function fetchVehiclePositions(
 			speed: typeof v.position.speed === 'number' ? v.position.speed : undefined,
 			lng,
 			lat,
-			timestamp: v.timestamp != null ? Number(v.timestamp) * 1000 : updatedAt
+			timestamp: v.timestamp != null ? Number(v.timestamp) * 1000 : updatedAt,
+			currentStopSequence: hasOwn(v, 'currentStopSequence')
+				? (v.currentStopSequence ?? undefined)
+				: undefined,
+			stopId: hasOwn(v, 'stopId') ? (v.stopId ?? undefined) : undefined,
+			currentStatus: hasOwn(v, 'currentStatus') ? vehicleStatus(v.currentStatus) : undefined
 		});
 	}
 	return { vehicles, updatedAt };

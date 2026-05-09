@@ -25,6 +25,8 @@ export interface Stop {
 	wheelchair: boolean;
 }
 
+export type VehicleStopStatus = 'INCOMING_AT' | 'STOPPED_AT' | 'IN_TRANSIT_TO';
+
 export interface Vehicle {
 	id: string;
 	tripId?: string;
@@ -35,6 +37,9 @@ export interface Vehicle {
 	lng: number;
 	lat: number;
 	timestamp: number;
+	currentStopSequence?: number;
+	stopId?: string;
+	currentStatus?: VehicleStopStatus;
 }
 
 export interface VehicleSnapshot {
