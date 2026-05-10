@@ -2,11 +2,13 @@
 	type Props = {
 		value: string;
 		onInput: (v: string) => void;
+		onFocus?: () => void;
 		placeholder?: string;
 	};
 	let {
 		value = $bindable(),
 		onInput,
+		onFocus,
 		placeholder = 'Rechercher une ligne, un arrêt'
 	}: Props = $props();
 </script>
@@ -28,6 +30,7 @@
 		type="search"
 		bind:value
 		oninput={(e) => onInput((e.currentTarget as HTMLInputElement).value)}
+		onfocus={() => onFocus?.()}
 		{placeholder}
 		autocomplete="off"
 		spellcheck="false"

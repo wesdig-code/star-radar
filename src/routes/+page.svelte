@@ -127,7 +127,13 @@
 					<DrillBus vehicleId={selectionStore.current.vehicleId} />
 				{:else}
 					<div class="default-header">
-						<SearchField bind:value={query} onInput={(v) => (query = v)} />
+						<SearchField
+							bind:value={query}
+							onInput={(v) => (query = v)}
+							onFocus={() => {
+								if (sheetSnap === 'peek') sheetSnap = 'mid';
+							}}
+						/>
 					</div>
 				{/if}
 			{/snippet}
