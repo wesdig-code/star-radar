@@ -40,11 +40,11 @@ export function basemapStyle(cfg: BasemapConfig): string | StyleSpecification {
 	}
 	return {
 		version: 8,
-		// jsDelivr-served openmaptiles/fonts: CDN-backed (99.9 % SLA) and the
-		// official upstream for OpenMapTiles glyphs. Replaces a previous URL on
-		// orangemug.github.io which had no stability guarantee. Production uses
-		// MapTiler glyphs above; this branch only runs in local dev.
-		glyphs: 'https://cdn.jsdelivr.net/gh/openmaptiles/fonts@v2.0/{fontstack}/{range}.pbf',
+		// Self-hosted Roboto Bold PBFs from `static/glyphs/`. Served by the
+		// SvelteKit static asset pipeline — same origin, no third-party CDN,
+		// no SLA risk. Only relevant in this dev fallback path: prod uses
+		// MapTiler's own glyphs URL from its style.json.
+		glyphs: '/glyphs/{fontstack}/{range}.pbf',
 		sources: {
 			osm: {
 				type: 'raster',
