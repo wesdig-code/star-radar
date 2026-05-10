@@ -18,6 +18,7 @@
 	import { selectionStore } from '$lib/stores/selection.svelte';
 	import { vehiclesStore } from '$lib/stores/vehicles.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
+	import { stopsStore } from '$lib/stores/stops.svelte';
 	import type { Map as MapLibreMap } from 'maplibre-gl';
 
 	let mapRef = $state<MapLibreMap | undefined>();
@@ -50,9 +51,21 @@
 	const filtered = $derived.by(() => {
 		const q = query.trim().toLowerCase();
 		if (!q) return linesStore.lines;
+		// A query also matches a line if it serves a stop whose name contains
+		// `q` — e.g. typing "Sainte-Anne" surfaces the metro line `a` even
+		// though neither the line code nor name contains those characters.
+		const linesViaStop = new Set<string>();
+		for (const s of stopsStore.stops) {
+			if (s.name.toLowerCase().includes(q)) {
+				for (const code of s.lineCodes) linesViaStop.add(code);
+			}
+		}
 		return linesStore.lines.filter(
 			(l) =>
-				l.code.toLowerCase().includes(q) || l.name.toLowerCase().includes(q) || l.mode.includes(q)
+				l.code.toLowerCase().includes(q) ||
+				l.name.toLowerCase().includes(q) ||
+				l.mode.includes(q) ||
+				linesViaStop.has(l.code)
 		);
 	});
 
