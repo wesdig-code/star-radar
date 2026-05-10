@@ -25,7 +25,11 @@ export class BasemapKeyMissingError extends Error {
 
 export function basemapStyle(cfg: BasemapConfig): string | StyleSpecification {
 	if (cfg.maptilerKey) {
-		return `https://api.maptiler.com/maps/streets-v2-light/style.json?key=${encodeURIComponent(cfg.maptilerKey)}`;
+		// `streets-v2` (not `-light`) keeps the same color saturation as the
+		// OSM dev fallback. The CSS filter in Map.svelte was tuned for that
+		// baseline — `-light` is already desaturated and the filter on top
+		// pushed the result to near-grayscale.
+		return `https://api.maptiler.com/maps/streets-v2/style.json?key=${encodeURIComponent(cfg.maptilerKey)}`;
 	}
 	if (!cfg.dev) {
 		throw new BasemapKeyMissingError();
