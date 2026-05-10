@@ -205,31 +205,44 @@
 
 	<div class="body">
 		{#if open}
-		{#if everythingFineGlobally}
-			<p class="empty">Réseau nominal, aucune perturbation signalée.</p>
-		{:else if hasFavorites}
-			<section class="group">
-				<h3>Mes lignes</h3>
-				{#if everythingFineForMe}
-					<p class="reassuring">Tes lignes vont bien. Perturbations ailleurs sur le réseau.</p>
-				{:else if myCount === 0}
-					<p class="empty">Rien à signaler.</p>
-				{:else}
-					{#each myCancels as c (c.routeId)}
-						{@render cancelRow(c)}
-					{/each}
-					{#each myDelays as d (d.routeId)}
-						{@render delayRow(d)}
-					{/each}
-					{#each myAlerts as a (a.id)}
-						{@render alertRow(a)}
-					{/each}
-				{/if}
-			</section>
+			{#if everythingFineGlobally}
+				<p class="empty">Réseau nominal, aucune perturbation signalée.</p>
+			{:else if hasFavorites}
+				<section class="group">
+					<h3>Mes lignes</h3>
+					{#if everythingFineForMe}
+						<p class="reassuring">Tes lignes vont bien. Perturbations ailleurs sur le réseau.</p>
+					{:else if myCount === 0}
+						<p class="empty">Rien à signaler.</p>
+					{:else}
+						{#each myCancels as c (c.routeId)}
+							{@render cancelRow(c)}
+						{/each}
+						{#each myDelays as d (d.routeId)}
+							{@render delayRow(d)}
+						{/each}
+						{#each myAlerts as a (a.id)}
+							{@render alertRow(a)}
+						{/each}
+					{/if}
+				</section>
 
-			{#if restCount > 0}
-				<section class="group separator">
-					<h3>Reste du réseau</h3>
+				{#if restCount > 0}
+					<section class="group separator">
+						<h3>Reste du réseau</h3>
+						{#each restCancels as c (c.routeId)}
+							{@render cancelRow(c)}
+						{/each}
+						{#each restDelays as d (d.routeId)}
+							{@render delayRow(d)}
+						{/each}
+						{#each restAlerts as a (a.id)}
+							{@render alertRow(a)}
+						{/each}
+					</section>
+				{/if}
+			{:else}
+				<section class="group">
 					{#each restCancels as c (c.routeId)}
 						{@render cancelRow(c)}
 					{/each}
@@ -241,23 +254,10 @@
 					{/each}
 				</section>
 			{/if}
-		{:else}
-			<section class="group">
-				{#each restCancels as c (c.routeId)}
-					{@render cancelRow(c)}
-				{/each}
-				{#each restDelays as d (d.routeId)}
-					{@render delayRow(d)}
-				{/each}
-				{#each restAlerts as a (a.id)}
-					{@render alertRow(a)}
-				{/each}
-			</section>
-		{/if}
 
-		{#if networkStore.error}
-			<p class="error">Connexion à STAR perdue, on retente automatiquement.</p>
-		{/if}
+			{#if networkStore.error}
+				<p class="error">Connexion à STAR perdue, on retente automatiquement.</p>
+			{/if}
 		{/if}
 	</div>
 </div>
