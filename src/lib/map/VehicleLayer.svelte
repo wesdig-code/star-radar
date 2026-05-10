@@ -169,11 +169,20 @@
 			map.setPaintProperty(LAYER_RING, 'circle-opacity', dimRing);
 			const dimLabel = ['case', ['==', ['get', 'lineCode'], filterCode], 1, 0.15] as never;
 			map.setPaintProperty(LAYER_LABEL, 'text-opacity', dimLabel);
+			// MapLibre allows only one zoom-based subexpression per expression
+			// and it must be at the top level — so we wrap the case inside the
+			// interpolate stops, not the other way around.
+			const matches = ['==', ['get', 'lineCode'], filterCode];
 			map.setPaintProperty(LAYER_DOT, 'circle-radius', [
-				'case',
-				['==', ['get', 'lineCode'], filterCode],
-				['interpolate', ['linear'], ['zoom'], 10, 6, 14, 10, 17, 15],
-				['interpolate', ['linear'], ['zoom'], 10, 5, 14, 9, 17, 14]
+				'interpolate',
+				['linear'],
+				['zoom'],
+				10,
+				['case', matches, 6, 5],
+				14,
+				['case', matches, 10, 9],
+				17,
+				['case', matches, 15, 14]
 			] as never);
 			return;
 		}
@@ -209,18 +218,26 @@
 		const inFavs = ['in', ['get', 'lineCode'], ['literal', favorites]] as never;
 		map.setPaintProperty(LAYER_DOT, 'circle-opacity', ['case', inFavs, 1, 0.55] as never);
 		map.setPaintProperty(LAYER_RING, 'circle-opacity', [
-			'case',
-			inFavs,
-			['interpolate', ['linear'], ['zoom'], 10, 0.3, 14, 0.55],
-			['interpolate', ['linear'], ['zoom'], 10, 0.1, 14, 0.2]
+			'interpolate',
+			['linear'],
+			['zoom'],
+			10,
+			['case', inFavs, 0.3, 0.1],
+			14,
+			['case', inFavs, 0.55, 0.2]
 		] as never);
 		map.setPaintProperty(LAYER_LABEL, 'text-opacity', ['case', inFavs, 1, 0.6] as never);
 		// Pinned lines also bump up by a hair to feel emphasized at-a-glance.
 		map.setPaintProperty(LAYER_DOT, 'circle-radius', [
-			'case',
-			inFavs,
-			['interpolate', ['linear'], ['zoom'], 10, 6, 14, 11, 17, 16],
-			['interpolate', ['linear'], ['zoom'], 10, 5, 14, 9, 17, 14]
+			'interpolate',
+			['linear'],
+			['zoom'],
+			10,
+			['case', inFavs, 6, 5],
+			14,
+			['case', inFavs, 11, 9],
+			17,
+			['case', inFavs, 16, 14]
 		] as never);
 	});
 
