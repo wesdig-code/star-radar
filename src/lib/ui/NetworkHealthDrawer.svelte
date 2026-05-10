@@ -107,7 +107,9 @@
 		}
 	}
 
-	function alertHeadline(a: NetworkAlert): string {
+	// Returns null when the GTFS effect is unknown so the renderer can skip
+	// the headline label and avoid duplicating `a.header`.
+	function alertHeadline(a: NetworkAlert): string | null {
 		switch (a.effect) {
 			case 'NO_SERVICE':
 				return 'Service interrompu';
@@ -124,7 +126,7 @@
 			case 'ADDITIONAL_SERVICE':
 				return 'Service renforcé';
 			default:
-				return a.header || 'Information';
+				return null;
 		}
 	}
 </script>
@@ -297,9 +299,11 @@
 			{/if}
 		</div>
 		<div class="text">
-			<div class="title">
-				<span class="label-strong">{alertHeadline(a)}</span>
-			</div>
+			{#if alertHeadline(a)}
+				<div class="title">
+					<span class="label-strong">{alertHeadline(a)}</span>
+				</div>
+			{/if}
 			<p class="alert-header">{a.header}</p>
 			{#if a.description}
 				<p class="alert-desc">{a.description}</p>
