@@ -180,6 +180,7 @@
 	aria-modal={open}
 	aria-labelledby="sr-network-title"
 	aria-hidden={!open}
+	inert={!open}
 	tabindex="-1"
 >
 	<header class="head">
@@ -203,6 +204,7 @@
 	</header>
 
 	<div class="body">
+		{#if open}
 		{#if everythingFineGlobally}
 			<p class="empty">Réseau nominal, aucune perturbation signalée.</p>
 		{:else if hasFavorites}
@@ -255,6 +257,7 @@
 
 		{#if networkStore.error}
 			<p class="error">Connexion à STAR perdue, on retente automatiquement.</p>
+		{/if}
 		{/if}
 	</div>
 </div>
