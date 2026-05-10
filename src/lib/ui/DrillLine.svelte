@@ -58,7 +58,9 @@
 	<div class="title">
 		<LineChip code={lineCode} size="lg" />
 		<div class="meta">
-			<h2>{line?.name ?? `Ligne ${lineCode}`}</h2>
+			<h2 title={line?.name ?? `Ligne ${lineCode}`}>
+				{line?.name ?? `Ligne ${lineCode}`}
+			</h2>
 			<p class="tick">
 				{onlineCount} véhicule{onlineCount > 1 ? 's' : ''} en circulation
 			</p>
@@ -168,9 +170,13 @@
 		font-size: 18px;
 		font-weight: 600;
 		color: var(--surface-fg);
+		line-height: 1.25;
+		text-wrap: balance;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		line-clamp: 3;
+		-webkit-box-orient: vertical;
 		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
 	}
 	.tick {
 		margin: 2px 0 0;
