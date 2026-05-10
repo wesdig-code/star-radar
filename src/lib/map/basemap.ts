@@ -3,19 +3,40 @@ import type { StyleSpecification } from 'maplibre-gl';
 /*
  * Basemap source.
  *
- * Default: OpenStreetMap raster tiles. No API key, real coverage at every
- * zoom level we need (8–18). When MAPTILER_KEY is set, swap to a vector
- * style for sharper rendering and proper light/dark variants.
- *
- * The Map-Floor Rule (DESIGN.md) wants the basemap quiet. We mute the OSM
- * canvas client-side via CSS filters so STAR line colors carry cartographic
- * emphasis. A custom MapTiler / Protomaps style would be tuned at the
- * source instead.
+ * Production: a MAPTILER_KEY must be set on the Cloudflare Worker so we
+ * serve a vector style with proper light/dark variants and stable glyphs.
+ * Without the key, we deliberately fail closed in prod — see Map.svelte
+ * for the error state. OSM tiles are *only* used as a local-dev fallback,
+ * gated by `dev = true`, so we don't violate the OSM tile usage policy
+ * <https://operations.osmfoundation.org/policies/tiles/> in production.
  */
 
-export function basemapStyle(maptilerKey?: string): string | StyleSpecification {
-	if (maptilerKey) {
-		return `https://api.maptiler.com/maps/streets-v2-light/style.json?key=${encodeURIComponent(maptilerKey)}`;
+export type BasemapConfig = {
+	maptilerKey: string | null;
+	dev: boolean;
+};
+
+export class BasemapKeyMissingError extends Error {
+	constructor() {
+		super('MAPTILER_KEY is not configured for this environment.');
+		this.name = 'BasemapKeyMissingError';
+	}
+}
+
+export function basemapStyle(cfg: BasemapConfig): string | StyleSpecification {
+	if (cfg.maptilerKey) {
+		return `https://api.maptiler.com/maps/streets-v2-light/style.json?key=${encodeURIComponent(cfg.maptilerKey)}`;
+	}
+	if (!cfg.dev) {
+		throw new BasemapKeyMissingError();
+	}
+	// Local-dev only: hits OSM directly to keep `pnpm dev` working without a
+	// key. Loud console warning so anyone deploying this path notices.
+	if (typeof console !== 'undefined') {
+		console.warn(
+			'[basemap] MAPTILER_KEY is unset — falling back to OpenStreetMap raster tiles. ' +
+				'This must NOT reach production (OSM tile usage policy).'
+		);
 	}
 	return {
 		version: 8,
