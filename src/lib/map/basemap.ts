@@ -40,10 +40,11 @@ export function basemapStyle(cfg: BasemapConfig): string | StyleSpecification {
 	}
 	return {
 		version: 8,
-		// Required by MapLibre to render any `symbol` layer with `text-field`.
-		// Free CDN of pre-built PBFs (Open Sans Regular/Bold, Roboto Bold, etc).
-		// Swap to MapTiler / self-hosted glyphs once a vector style lands.
-		glyphs: 'https://orangemug.github.io/font-glyphs/glyphs/{fontstack}/{range}.pbf',
+		// jsDelivr-served openmaptiles/fonts: CDN-backed (99.9 % SLA) and the
+		// official upstream for OpenMapTiles glyphs. Replaces a previous URL on
+		// orangemug.github.io which had no stability guarantee. Production uses
+		// MapTiler glyphs above; this branch only runs in local dev.
+		glyphs: 'https://cdn.jsdelivr.net/gh/openmaptiles/fonts@v2.0/{fontstack}/{range}.pbf',
 		sources: {
 			osm: {
 				type: 'raster',
