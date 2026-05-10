@@ -83,14 +83,20 @@
 	}
 
 	function onHandleKey(e: KeyboardEvent): void {
-		if (e.key === 'ArrowUp') {
+		if (e.key === 'ArrowUp' || e.key === 'PageUp') {
 			e.preventDefault();
 			if (snap === 'peek') setSnap('mid');
 			else if (snap === 'mid') setSnap('full');
-		} else if (e.key === 'ArrowDown') {
+		} else if (e.key === 'ArrowDown' || e.key === 'PageDown') {
 			e.preventDefault();
 			if (snap === 'full') setSnap('mid');
 			else if (snap === 'mid') setSnap('peek');
+		} else if (e.key === 'Home') {
+			e.preventDefault();
+			setSnap('peek');
+		} else if (e.key === 'End') {
+			e.preventDefault();
+			setSnap('full');
 		}
 	}
 </script>
