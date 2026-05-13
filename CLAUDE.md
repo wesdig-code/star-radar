@@ -7,23 +7,29 @@ Strategic context lives in `PRODUCT.md`. Visual system lives in `DESIGN.md` (cur
 ## Stack
 
 - **SvelteKit 2** (Svelte 5, runes mode) + **TypeScript** (strict)
-- **Vite** + **pnpm**
+- **Vite** + **pnpm**, Node 22
 - **MapLibre GL JS v4** for cartography
-- **Tailwind CSS v4** (CSS-first `@theme` config) — design tokens in OKLCH at `src/lib/styles/tokens.css`
-- **Cloudflare Pages + Workers** via `@sveltejs/adapter-cloudflare`
-- **Paraglide JS** (`@inlang/paraglide-sveltekit`) for i18n — French primary, English optional
-- **`@vite-pwa/sveltekit`** for PWA shell + offline
-- **Vitest** for unit tests; Playwright added when a flow earns it
-- **ESLint + Prettier** with Svelte plugins (the `sv create` defaults), `svelte-check` for template types
+- **Tailwind CSS v4** (CSS-first `@theme` config) — design tokens in OKLCH inline at `src/app.css`
+- **Cloudflare Pages + Workers** via `@sveltejs/adapter-cloudflare` (`wrangler.toml`)
+- **`gtfs-realtime-bindings`** for protobuf decode (server-only); GTFS static unpacked at build time with `adm-zip` + `csv-parse`
+- **Vitest** for unit tests; **Playwright** for visual/E2E (`pnpm test:visual`)
+- **ESLint + Prettier** with Svelte plugins, `svelte-check` for template types
+
+Copy is French-first inline (no i18n framework yet — keep strings centralized in component scope so Paraglide can be slotted in later without surgery).
 
 ## Real-time data
 
 The STAR network (Keolis Rennes) publishes open data at `data.explore.star.fr`.
 
-- **GTFS static** (routes, stops, schedules): fetched at build time or via a daily cron, cached.
-- **GTFS-Realtime VehiclePositions** (protobuf): polled every 10–15s server-side, decoded with `gtfs-realtime-bindings`, served as plain JSON to the client.
-- All STAR calls go through SvelteKit endpoints (`src/routes/api/...`). The browser never hits STAR directly — protobuf decode and any API keys stay server-side, request volume stays predictable.
-- Cache edge responses for 5–10s to avoid hammering STAR.
+- **GTFS static** (routes, stops, schedules): unpacked at build time by `scripts/build-stops.mjs` and `scripts/build-trip-stops.mjs` into `static/stops.json` and `static/trip-stops.json`. Re-run via `pnpm build:stops` / `pnpm build:trip-stops`. See `docs/gtfs-rt.md` for the GTFS-RT feed notes.
+- **GTFS-Realtime VehiclePositions** (protobuf): fetched server-side, decoded with `gtfs-realtime-bindings`, served as plain JSON via `/api/vehicles`.
+- All STAR calls go through SvelteKit endpoints under `src/routes/api/`:
+  - `/api/vehicles` — decoded GTFS-RT vehicle positions
+  - `/api/lines` — line metadata (refines runtime line colors per Operator-Truth Rule)
+  - `/api/mapconfig` — basemap config (tile URL with server-side `MAPTILER_KEY`)
+  - `/api/network/health` — feed freshness + degradation signal (drives `FreshnessIndicator` / `NetworkHealthDrawer`)
+- The browser never hits STAR or MapTiler directly — protobuf decode and any API keys stay server-side.
+- Cache edge responses briefly (5–10s) to avoid hammering STAR.
 
 ## Dev conventions
 
@@ -51,22 +57,26 @@ Two doctrines from DESIGN.md to remember by name:
 - **The Operator-Truth Rule** — STAR's official line colors are sacred; never adjust them for "design coherence".
 - **The Tabular-Mono Rule** — anything that ticks (ETAs, codes, IDs) renders in mono with tabular figures.
 
-## Scripts (after scaffolding)
+## Scripts
 
 - `pnpm dev` — Vite dev server
-- `pnpm build` — production build (Cloudflare adapter)
+- `pnpm build` — rebuilds stop snapshots, then production build (Cloudflare adapter)
+- `pnpm build:stops` / `pnpm build:trip-stops` — regenerate the GTFS static snapshots independently
 - `pnpm preview` — local preview of the production build
 - `pnpm check` — `svelte-check` (template + type errors)
 - `pnpm lint` / `pnpm format` — ESLint + Prettier
-- `pnpm test` — Vitest
-- `pnpm wrangler:dev` — local Worker + edge runtime simulation
+- `pnpm test` / `pnpm test:watch` — Vitest
+- `pnpm test:visual` — Playwright
 
-## Status
+## Code map
 
-The project root currently contains only `.git`, `.claude`, `PRODUCT.md`, `DESIGN.md`, and this file. SvelteKit scaffolding has not been run yet. First step before any feature work:
+- `src/lib/map/` — `Map.svelte`, `VehicleLayer.svelte`, `StopLayer.svelte`, `basemap.ts`. Cartography lives here; everything else is supporting cast.
+- `src/lib/ui/` — chrome and panels: `BottomSheet`, `DrillBus`, `DrillLine`, `LineChip` / `LineList`, `SearchField`, `FreshnessIndicator`, `NetworkHealthDrawer`, `MetroBanner`, `GeoNudge`, `CenterButton`, `StarToggle`, `EmptyState`.
+- `src/lib/star/` — STAR data layer: `api.ts`, `lines.ts`, `line-detail.ts`, `health.ts`, `types.ts`, with co-located tests + `__fixtures__/`.
+- `src/lib/stores/` — Svelte 5 runes stores (`*.svelte.ts`): `vehicles`, `stops`, `trip-stops`, `lines`, `network`, `selection`, `favorites`, `geo`, `tick`.
+- `src/lib/utils/` — `eta.ts` (ETA formatting), `pollable.ts` (polling primitive used by realtime stores).
+- `src/routes/+page.svelte` — single-page shell hosting the map + UI.
+- `scripts/` — build-time GTFS snapshot generators.
+- `static/` — `stops.json`, `trip-stops.json` (generated), `glyphs/` for MapLibre fonts.
 
-```bash
-pnpm create svelte@latest .
-```
-
-After scaffolding, route through `/impeccable shape <feature>` to design the first surface (the live map) before writing UI code.
+When adding a feature, route through `/impeccable shape <feature>` before writing UI code.
